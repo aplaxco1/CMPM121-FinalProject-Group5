@@ -25,12 +25,15 @@ Responsibilities:
 - Identify and fix bugs that arise within the program. 
 
 **Autumn Plaxco** - Engine Lead
+
 Responsibilities:
 - Maintain the game engine of choice and research new engines to meet challenges.
 - Establish standards for code organization and management.
 - Produce code examples and propose software design.
 
 **Dongling Yang (Ada)** - Art Lead
+
+Responsibilities:
 - Create majority of art assets needed for the project.
 - Create necessray data files for implementing animations.
 - Outline game mechanics as related to project's art style and visual format.
