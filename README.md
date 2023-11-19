@@ -81,6 +81,12 @@ make sure that the code is structured loosely enough that it will be easy for us
 Given our hopes for the additional features we want to include, it will also be difficult for us to do so given the limited amount of time that we have to implement the basic structure of the game
 and the nature of complications that arise when working on code between multiple different people with their own approaches to programming.
 
+By approaching this project with the tools that we have selected, we are hoping to collaborate on creating a game that utilizes TypeScript and Phaser in a much more structured and complex way. 
+While we have experience with using Phaser and JavaScript together, we are hoping to learn how the process might differ when instead using TypeScript instead, and what sorts of benefits it offers over
+traditional JavaScript. We are also hoping to combine the knowledge that we have previously gained by using Phaser and our newfound knowledge of more advanced programming tools and development patterns, 
+so to create a project in a way that expands upon our past experiences by utilizing more complex tools and structures. In addition to this, we are also hoping to gain more experience of programming collaboratively, 
+and to learn the best practices of managing various game factors while keeping the code readable and flexible between group members. Lastly, in a more general sense, we wish to gain a deeper understanding 
+of game development in a team environment.
 
 
 
