@@ -1,19 +1,23 @@
-import { Plant } from "../classes/plant.ts";
 import * as Phaser from "phaser";
+import { Plant } from "../classes/plant.ts";
 
 export default class PlantTest extends Phaser.Scene {
-  //cornSprite: Phaser.GameObjects.Sprite | null = null;
-  corn: Plant | null = null;
-
   constructor() {
     super("planttest");
   }
 
-  preload(): void {} // sprite is preloaded
+  preload(): void {
+    let cornURL = "/assets/tempemojidonotuse.png";
+    this.load.image("tree", cornURL);
+  } // sprite is preloaded
 
   create(): void {
-    this.corn = new Plant("Corn", 1, 1);
-    //this.cornSprite = this.add.sprite(100, 100, "corn");
-    console.log(this.corn.getPlantName());
+    // Plant(scene, x, y, texture, plantName, growthRate, nutrientsNeeded);
+    let tree = new Plant(this, 100, 100, "tree", "Tree", 1, 1).setScale(0.15);
+    let tree2 = new Plant(this, 300, 300, "tree", "Tree 2", 1, 1).setScale(
+      0.15,
+    );
+    console.log(tree);
+    console.log(tree2); // for commit
   }
 }
