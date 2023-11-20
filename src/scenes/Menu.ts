@@ -2,7 +2,7 @@ import * as Phaser from "phaser";
 
 export default class Menu extends Phaser.Scene {
   title?: Phaser.GameObjects.Text;
-  start?: Phaser.Input.Keyboard.Key;
+  space?: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super("menu");
@@ -28,11 +28,11 @@ export default class Menu extends Phaser.Scene {
         menuConfig,
       )
       .setOrigin(0.5);
-    this.start = this.#addKey("SPACE");
+    this.space = this.#addKey("SPACE");
   }
 
   update() {
-    if (Phaser.Input.Keyboard.JustDown(this.start!)) {
+    if (Phaser.Input.Keyboard.JustDown(this.space!)) {
       this.scene.stop();
       this.scene.start("play");
     }

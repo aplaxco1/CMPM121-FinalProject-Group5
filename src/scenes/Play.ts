@@ -10,11 +10,39 @@ export default class Play extends Phaser.Scene {
   gridCells?: { x: number; y: number }[][] = [];
   player?: Player;
 
+  // list of keyboard inputs
+  movementInputs?: Phaser.Input.Keyboard.Key[];
+  right?: Phaser.Input.Keyboard.Key;
+  left?: Phaser.Input.Keyboard.Key;
+  up?: Phaser.Input.Keyboard.Key;
+  down?: Phaser.Input.Keyboard.Key;
+
   constructor() {
     super("play");
   }
 
+  #addKey(
+    name: keyof typeof Phaser.Input.Keyboard.KeyCodes,
+  ): Phaser.Input.Keyboard.Key {
+    return this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes[name]);
+  }
+
   create() {
+    // add keyboard keys
+    this.right = this.#addKey("RIGHT");
+    this.left = this.#addKey("LEFT");
+    this.up = this.#addKey("UP");
+    this.down = this.#addKey("DOWN");
+    this.movementInputs = [this.right, this.left, this.up, this.down];
+
+    // set world bounds so player cannot move outside of them
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.game.config.width as number,
+      (this.game.config.height as number) - UIBarHeight,
+    );
+
     // draw grid
     this.drawGrid();
 
@@ -32,10 +60,44 @@ export default class Play extends Phaser.Scene {
     // create player
     this.player = new Player(
       this,
-      (this.game.config.width as number) / 2,
-      (this.game.config.height as number) / 2,
+      30,
+      30,
       "idle_down",
+      gridCellWidth,
+      gridCellHeight,
     ).setOrigin(0.5, 0.5);
+    this.player.setCollideWorldBounds(true);
+  }
+
+  update() {
+    // simple player movement
+    let canMove = this.canMove();
+    if (this.right!.isDown && canMove) {
+      this.player!.move(1, 0);
+    }
+    if (this.left!.isDown && canMove) {
+      this.player!.move(-1, 0);
+    }
+    if (this.up!.isDown && canMove) {
+      this.player!.move(0, -1);
+    }
+    if (this.down!.isDown && canMove) {
+      this.player!.move(0, 1);
+    }
+  }
+
+  // prevents diagonal movement
+  canMove(): boolean {
+    let count = 0;
+    for (let key of this.movementInputs!) {
+      if (key.isDown) {
+        count += 1;
+      }
+    }
+    if (count > 1) {
+      return false;
+    }
+    return true;
   }
 
   drawGrid() {
@@ -61,7 +123,5 @@ export default class Play extends Phaser.Scene {
       }
       this.gridCells?.push(currCol);
     }
-    console.log(this.gridCells!.length);
-    this.gridCells?.forEach((ob) => console.log(ob));
   }
 }
