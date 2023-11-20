@@ -1,5 +1,7 @@
 import * as Phaser from "phaser";
 
+import playerspriteURL from "/assets/playersprite.png";
+
 export default class Load extends Phaser.Scene {
   constructor() {
     super("load");
@@ -9,8 +11,8 @@ export default class Load extends Phaser.Scene {
     // load player spritesheet
     this.load.atlas(
       "player_atlas",
-      "/assets/playersprite.png",
-      "/assets/playersprite_map.json",
+      playerspriteURL,
+      "./src/playersprite_map.json",
     );
   }
 
