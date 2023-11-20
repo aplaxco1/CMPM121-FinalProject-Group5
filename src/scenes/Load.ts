@@ -12,7 +12,7 @@ export default class Load extends Phaser.Scene {
     this.load.atlas(
       "player_atlas",
       playerspriteURL,
-      "./src/playersprite_map.json",
+      "/assets/playersprite_map.json?url",
     );
   }
 
