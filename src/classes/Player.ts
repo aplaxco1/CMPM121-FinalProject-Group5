@@ -4,6 +4,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   cellWidth?: number;
   cellHeight?: number;
   currCell?: { x: number; y: number };
+  moveSpeed: number = 200;
 
   constructor(
     scene: Phaser.Scene,
@@ -17,6 +18,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.anims.play("idle_down");
+    this.body!.setSize(cellWidth / 3, cellHeight / 3);
     this.setScale(3);
     this.cellWidth = cellWidth;
     this.cellHeight = cellHeight;
@@ -28,10 +30,32 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.currCell = { x: x, y: y };
   }
 
-  move(x: number, y: number) {
-    this.x += x;
-    this.y += y;
-    this.setCurrCell();
-    console.log(this.currCell);
+  moveLeft() {
+    if (!this.body!.blocked.left) {
+      this.setVelocityX(-this.moveSpeed);
+    }
+  }
+
+  moveRight() {
+    if (!this.body!.blocked.right) {
+      this.setVelocityX(this.moveSpeed);
+    }
+  }
+
+  moveUp() {
+    if (!this.body!.blocked.up) {
+      this.setVelocityY(-this.moveSpeed);
+    }
+  }
+
+  moveDown() {
+    if (!this.body!.blocked.down) {
+      this.setVelocityY(this.moveSpeed);
+    }
+  }
+
+  stopMoving() {
+    this.setVelocityX(0);
+    this.setVelocityY(0);
   }
 }

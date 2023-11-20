@@ -76,23 +76,27 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // simple player movement
-    let canMove = this.canMove();
-    if (this.right!.isDown && canMove) {
-      this.player!.move(1, 0);
-    }
-    if (this.left!.isDown && canMove) {
-      this.player!.move(-1, 0);
-    }
-    if (this.up!.isDown && canMove) {
-      this.player!.move(0, -1);
-    }
-    if (this.down!.isDown && canMove) {
-      this.player!.move(0, 1);
-    }
+    this.movePlayer();
 
     if (this.place!.isDown) {
       this.plant("tree");
     }
+  }
+
+  movePlayer() {
+    let canMove = this.canMove();
+    if (this.right!.isDown && canMove) {
+      this.player!.moveRight();
+    } else if (this.left!.isDown && canMove) {
+      this.player!.moveLeft();
+    } else if (this.up!.isDown && canMove) {
+      this.player!.moveUp();
+    } else if (this.down!.isDown && canMove) {
+      this.player!.moveDown();
+    } else {
+      this.player!.stopMoving();
+    }
+    this.player!.setCurrCell();
   }
 
   // prevents diagonal movement
