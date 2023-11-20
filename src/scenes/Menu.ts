@@ -15,11 +15,17 @@ export default class Menu extends Phaser.Scene {
   }
 
   create() {
+    let menuConfig = {
+      align: "center",
+      fontSize: "28px",
+    };
+
     this.title = this.add
       .text(
         (this.game.config.width as number) / 2,
         (this.game.config.height as number) / 2,
-        "Game Title",
+        "CMPM 121 - Final Project\nGardening Game\n\nPress [SPACE] to play.",
+        menuConfig,
       )
       .setOrigin(0.5);
     this.start = this.#addKey("SPACE");

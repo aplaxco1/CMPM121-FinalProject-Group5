@@ -5,8 +5,13 @@ import Play from "./scenes/Play";
 //import PlantTest from "./scenes/tests/PlantTest";
 
 const config: Phaser.Types.Core.GameConfig = {
-  width: 640,
-  height: 480,
+  width: 780,
+  height: 720,
+  antialias: false,
+  scale: {
+    // centers game vertically and horizontally
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
   scene: [Load, Menu, Play],
   //scene: [PlantTest],
   physics: {
