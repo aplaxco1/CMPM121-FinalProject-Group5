@@ -9,6 +9,8 @@ const UIBarHeight: number = 120;
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
   gridCells?: { x: number; y: number }[][] = [];
+  // plantMap stores whatever plant exists at the current [row][col] grid cell
+  plantMap: Map<string, Plant> = new Map();
   player?: Player;
 
   // list of keyboard inputs
@@ -114,11 +116,15 @@ export default class Play extends Phaser.Scene {
   }
 
   plant(plant: string) {
-    let x = this.player!.currCell!.x * gridCellWidth;
-    let y = this.player!.currCell!.y * gridCellHeight;
-
-    let newPlant = new Plant(this, x, y, plant, plant, 1, 1).setScale(0.15);
-    console.log(newPlant);
+    let pos =
+      this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
+    if (!this.plantMap.get(JSON.stringify(pos))) {
+      let newPlant = new Plant(this, pos.x, pos.y, plant, plant, 1, 1)
+        .setScale(0.1)
+        .setOrigin(0, 0);
+      this.plantMap.set(JSON.stringify(pos), newPlant);
+      console.log(newPlant);
+    }
   }
 
   drawGrid() {

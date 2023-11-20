@@ -17,6 +17,7 @@ export class Plant extends Phaser.GameObjects.Sprite {
     super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.setSize(30, 30);
 
     this.plantName = newPlantName;
     this.growthRate = newGrowthRate;
