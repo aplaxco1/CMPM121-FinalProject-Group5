@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
+import { Plant } from "../classes/plant.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
@@ -16,6 +17,8 @@ export default class Play extends Phaser.Scene {
   left?: Phaser.Input.Keyboard.Key;
   up?: Phaser.Input.Keyboard.Key;
   down?: Phaser.Input.Keyboard.Key;
+  // for placing plants
+  place?: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super("play");
@@ -33,6 +36,8 @@ export default class Play extends Phaser.Scene {
     this.left = this.#addKey("LEFT");
     this.up = this.#addKey("UP");
     this.down = this.#addKey("DOWN");
+    this.place = this.#addKey("SPACE");
+
     this.movementInputs = [this.right, this.left, this.up, this.down];
 
     // set world bounds so player cannot move outside of them
@@ -84,6 +89,10 @@ export default class Play extends Phaser.Scene {
     if (this.down!.isDown && canMove) {
       this.player!.move(0, 1);
     }
+
+    if (this.place!.isDown) {
+      this.plant("tree");
+    }
   }
 
   // prevents diagonal movement
@@ -98,6 +107,13 @@ export default class Play extends Phaser.Scene {
       return false;
     }
     return true;
+  }
+
+  plant(plant: string) {
+    let x = this.player!.currCell!.x * gridCellWidth;
+    let y = this.player!.currCell!.y * gridCellHeight;
+
+    let newPlant = new Plant(this, x, y, plant, plant, 1, 1).setScale(0.15);
   }
 
   drawGrid() {
