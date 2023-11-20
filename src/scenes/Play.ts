@@ -114,6 +114,7 @@ export default class Play extends Phaser.Scene {
     let y = this.player!.currCell!.y * gridCellHeight;
 
     let newPlant = new Plant(this, x, y, plant, plant, 1, 1).setScale(0.15);
+    console.log(newPlant);
   }
 
   drawGrid() {
