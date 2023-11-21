@@ -96,6 +96,7 @@ of game development in a team environment.
 # Devlog Entry 02 - 11/22/2023
 
 ## How We Satisfied Softwate Requirements [F0]
+
 - [F0.a] You control a character moving on a 2D grid
 - [F0.b] You advance time in the turn-based simulation manually.
 - [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them.
