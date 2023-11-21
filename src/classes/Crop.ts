@@ -1,4 +1,4 @@
-export class Plant extends Phaser.GameObjects.Sprite {
+export class Crop extends Phaser.GameObjects.Sprite {
   plantName: string;
   growthRate: number;
   nutrientsNeeded: number;
