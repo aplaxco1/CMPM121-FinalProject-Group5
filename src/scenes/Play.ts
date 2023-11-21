@@ -14,6 +14,11 @@ export default class Play extends Phaser.Scene {
   player?: Player;
   collectedCrops: Map<string, number> = new Map(); // to check win condition
 
+  // current global conditions across all cells
+  currentSunLevel?: number;
+  currentWaterLevel?: number;
+  sleeping: boolean = false;
+
   // list of keyboard inputs //
   // for player movement
   movementInputs?: Phaser.Input.Keyboard.Key[];
@@ -25,6 +30,8 @@ export default class Play extends Phaser.Scene {
   place?: Phaser.Input.Keyboard.Key;
   // for collecting plants
   collect?: Phaser.Input.Keyboard.Key;
+  // to progress turn
+  sleep?: Phaser.Input.Keyboard.Key;
 
   // UI text
   textConfig = {
@@ -51,7 +58,7 @@ export default class Play extends Phaser.Scene {
     this.down = this.#addKey("DOWN");
     this.place = this.#addKey("SPACE");
     this.collect = this.#addKey("ENTER");
-
+    this.sleep = this.#addKey("S");
     this.movementInputs = [this.right, this.left, this.up, this.down];
 
     // set world bounds so player cannot move outside of them
@@ -60,6 +67,13 @@ export default class Play extends Phaser.Scene {
       0,
       this.game.config.width as number,
       (this.game.config.height as number) - uIBarHeight,
+    );
+
+    // randomize global sun and water levels
+    this.randomizeConditions();
+    console.log(
+      "Sun Level = " + this.currentSunLevel,
+      "Water Level = " + this.currentWaterLevel,
     );
 
     // initialize collected crops to zero
@@ -93,7 +107,7 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (this.collectedCrops.get("tree")! < 5) {
+    if (this.collectedCrops.get("tree")! < 5 && !this.sleeping) {
       // simple player movement
       this.movePlayer();
 
@@ -106,7 +120,16 @@ export default class Play extends Phaser.Scene {
       if (this.collect!.isDown) {
         this.collectPlant();
       }
-    } else {
+
+      // progress turn
+      if (Phaser.Input.Keyboard.JustDown(this.sleep!)) {
+        this.sleeping = true;
+        this.player!.stopMoving();
+        this.cameras.main.fadeOut(1000);
+        this.time.delayedCall(1000, this.fadeIn, [], this);
+        this.time.delayedCall(2000, this.playerWake, [], this);
+      }
+    } else if (!this.sleeping) {
       this.player!.stopMoving();
       this.winText = this.add
         .text(
@@ -165,7 +188,6 @@ export default class Play extends Phaser.Scene {
         .setScale(0.1)
         .setOrigin(0, 0);
       this.cropMap.set(JSON.stringify(pos), newPlant);
-      console.log(newPlant);
     }
   }
 
@@ -184,6 +206,19 @@ export default class Play extends Phaser.Scene {
       this.cropMap.set(JSON.stringify(pos), null);
       currCrop.destroy();
     }
+  }
+
+  fadeIn() {
+    this.cameras.main.fadeIn(1000);
+  }
+  playerWake() {
+    // GROW PLANTS HERE ONCE IMPLEMENTED (iterate through map -> grow if not null)
+    this.randomizeConditions();
+    console.log(
+      "Sun Level = " + this.currentSunLevel,
+      "Water Level = " + this.currentWaterLevel,
+    );
+    this.sleeping = false;
   }
 
   drawGrid() {
@@ -210,4 +245,13 @@ export default class Play extends Phaser.Scene {
       this.gridCells?.push(currCol);
     }
   }
+
+  randomizeConditions() {
+    this.currentSunLevel = randomInt(1, 3);
+    this.currentWaterLevel = randomInt(1, 3);
+  }
+}
+
+function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * max + min);
 }
