@@ -10,10 +10,12 @@ export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
   gridCells?: { x: number; y: number }[][] = [];
   // plantMap stores whatever plant exists at the current [row][col] grid cell
-  plantMap: Map<string, Crop> = new Map();
+  cropMap: Map<string, Crop | null> = new Map();
   player?: Player;
+  collectedCrops: Map<string, number> = new Map(); // to check win condition
 
-  // list of keyboard inputs
+  // list of keyboard inputs //
+  // for player movement
   movementInputs?: Phaser.Input.Keyboard.Key[];
   right?: Phaser.Input.Keyboard.Key;
   left?: Phaser.Input.Keyboard.Key;
@@ -21,6 +23,8 @@ export default class Play extends Phaser.Scene {
   down?: Phaser.Input.Keyboard.Key;
   // for placing plants
   place?: Phaser.Input.Keyboard.Key;
+  // for collecting plants
+  collect?: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super("play");
@@ -39,6 +43,7 @@ export default class Play extends Phaser.Scene {
     this.up = this.#addKey("UP");
     this.down = this.#addKey("DOWN");
     this.place = this.#addKey("SPACE");
+    this.collect = this.#addKey("ENTER");
 
     this.movementInputs = [this.right, this.left, this.up, this.down];
 
@@ -80,8 +85,14 @@ export default class Play extends Phaser.Scene {
     // simple player movement
     this.movePlayer();
 
+    // plant a crop
     if (this.place!.isDown) {
       this.plant("tree");
+    }
+
+    // collect a crop
+    if (this.collect!.isDown) {
+      this.collectPlant();
     }
   }
 
@@ -118,12 +129,32 @@ export default class Play extends Phaser.Scene {
   plant(plant: string) {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
-    if (!this.plantMap.get(JSON.stringify(pos))) {
+    if (
+      !this.cropMap.get(JSON.stringify(pos)) ||
+      this.cropMap.get(JSON.stringify(pos)) == null
+    ) {
       const newPlant = new Crop(this, pos.x, pos.y, plant, plant, 1, 1)
         .setScale(0.1)
         .setOrigin(0, 0);
-      this.plantMap.set(JSON.stringify(pos), newPlant);
+      this.cropMap.set(JSON.stringify(pos), newPlant);
       console.log(newPlant);
+    }
+  }
+
+  collectPlant() {
+    const pos =
+      this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
+    const currCrop = this.cropMap.get(JSON.stringify(pos));
+    if (currCrop != null) {
+      let cropCount = this.collectedCrops.get(currCrop.getPlantName());
+      if (cropCount) {
+        cropCount += 1;
+      } else {
+        cropCount = 1;
+      }
+      this.collectedCrops.set(currCrop.getPlantName(), cropCount);
+      this.cropMap.set(JSON.stringify(pos), null);
+      currCrop.destroy();
     }
   }
 
