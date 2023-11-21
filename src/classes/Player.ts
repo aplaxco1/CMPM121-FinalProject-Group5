@@ -5,6 +5,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   cellHeight?: number;
   currCell?: { x: number; y: number };
   moveSpeed: number = 200;
+  lastKnownDirection: string = "down";
 
   constructor(
     scene: Phaser.Scene,
@@ -35,6 +36,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityX(-this.moveSpeed);
     }
     this.anims.play("walk_left", true);
+    this.lastKnownDirection = "left";
   }
 
   moveRight() {
@@ -42,6 +44,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityX(this.moveSpeed);
     }
     this.anims.play("walk_right", true);
+    this.lastKnownDirection = "right";
   }
 
   moveUp() {
@@ -49,6 +52,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityY(-this.moveSpeed);
     }
     this.anims.play("walk_up", true);
+    this.lastKnownDirection = "up";
   }
 
   moveDown() {
@@ -56,11 +60,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityY(this.moveSpeed);
     }
     this.anims.play("walk_down", true);
+    this.lastKnownDirection = "down";
   }
 
   stopMoving() {
     this.setVelocityX(0);
     this.setVelocityY(0);
-    this.anims.play("idle_down", true);
+    this.anims.play("idle_" + this.lastKnownDirection, true);
   }
 }
