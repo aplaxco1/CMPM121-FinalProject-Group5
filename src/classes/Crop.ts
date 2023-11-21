@@ -1,7 +1,5 @@
 export class Crop extends Phaser.GameObjects.Sprite {
-  plantName: string;
-  growthRate: number;
-  nutrientsNeeded: number;
+  cropData?: cropOption;
   growthLevel: number = 0;
 
   constructor(
@@ -9,31 +7,29 @@ export class Crop extends Phaser.GameObjects.Sprite {
     x: number,
     y: number,
     texture: string,
-
-    newPlantName: string,
-    newGrowthRate: number,
-    newNutrientsNeeded: number,
+    crop: cropOption,
   ) {
     super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setSize(30, 30);
 
-    this.plantName = newPlantName;
-    this.growthRate = newGrowthRate;
-    this.nutrientsNeeded = newNutrientsNeeded;
+    this.cropData = crop;
   }
 
   getPlantName(): string {
-    return this.plantName;
+    return this.cropData!.cropName;
   }
 
   getGrowthRate(): number {
-    return this.growthRate;
+    return this.cropData!.growthRate;
   }
 
-  getnutrientsNeeded(): number {
-    return this.nutrientsNeeded;
+  getnutrientsNeeded(): { sunLevel: number; waterLevel: number } {
+    return {
+      sunLevel: this.cropData!.sunLevel,
+      waterLevel: this.cropData!.waterLevel,
+    };
   }
 
   getGrowthLevel(): number {

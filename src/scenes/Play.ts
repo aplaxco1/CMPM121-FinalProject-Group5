@@ -6,6 +6,45 @@ const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 120;
 
+const cropOptions: cropOption[] = [
+  {
+    cropName: "strawberry",
+    growthRate: 5,
+    sunLevel: 2,
+    waterLevel: 3,
+    spaceNeeded: 0,
+    cropToAvoid: "potato",
+  },
+  {
+    cropName: "potato",
+    growthRate: 4,
+    sunLevel: 3,
+    waterLevel: 4,
+    spaceNeeded: 1,
+    cropToAvoid: "",
+  },
+  {
+    cropName: "corn",
+    growthRate: 6,
+    sunLevel: 4,
+    waterLevel: 2,
+    spaceNeeded: 1,
+    cropToAvoid: "strawberry",
+  },
+];
+
+// TEMPORARY TREE CROP WHILE IN PROGRESS
+const treeCrop: cropOption = {
+  cropName: "tree",
+  growthRate: 8,
+  sunLevel: 2,
+  waterLevel: 3,
+  spaceNeeded: 2,
+  cropToAvoid: "",
+};
+
+console.log(cropOptions);
+
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
   gridCells?: { x: number; y: number }[][] = [];
@@ -77,7 +116,7 @@ export default class Play extends Phaser.Scene {
     );
 
     // initialize collected crops to zero
-    this.collectedCrops.set("tree", 0);
+    this.collectedCrops.set(treeCrop.cropName, 0);
 
     // draw grid
     this.drawGrid();
@@ -107,13 +146,13 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (this.collectedCrops.get("tree")! < 5 && !this.sleeping) {
+    if (this.collectedCrops.get(treeCrop.cropName)! < 5 && !this.sleeping) {
       // simple player movement
       this.movePlayer();
 
       // plant a crop
       if (this.place!.isDown) {
-        this.plant("tree");
+        this.plant(treeCrop);
       }
 
       // collect a crop
@@ -177,14 +216,14 @@ export default class Play extends Phaser.Scene {
     return true;
   }
 
-  plant(plant: string) {
+  plant(crop: cropOption) {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
     if (
       !this.cropMap.get(JSON.stringify(pos)) ||
       this.cropMap.get(JSON.stringify(pos)) == null
     ) {
-      const newPlant = new Crop(this, pos.x, pos.y, plant, plant, 1, 1)
+      const newPlant = new Crop(this, pos.x, pos.y, crop.cropName, crop)
         .setScale(0.1)
         .setOrigin(0, 0);
       this.cropMap.set(JSON.stringify(pos), newPlant);
@@ -247,8 +286,8 @@ export default class Play extends Phaser.Scene {
   }
 
   randomizeConditions() {
-    this.currentSunLevel = randomInt(1, 3);
-    this.currentWaterLevel = randomInt(1, 3);
+    this.currentSunLevel = randomInt(1, 5);
+    this.currentWaterLevel = randomInt(1, 5);
   }
 }
 
