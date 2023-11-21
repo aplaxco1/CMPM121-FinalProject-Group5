@@ -26,6 +26,13 @@ export default class Play extends Phaser.Scene {
   // for collecting plants
   collect?: Phaser.Input.Keyboard.Key;
 
+  // UI text
+  textConfig = {
+    align: "center",
+    fontSize: "28px",
+  };
+  winText?: Phaser.GameObjects.Text;
+
   constructor() {
     super("play");
   }
@@ -55,6 +62,9 @@ export default class Play extends Phaser.Scene {
       (this.game.config.height as number) - uIBarHeight,
     );
 
+    // initialize collected crops to zero
+    this.collectedCrops.set("tree", 0);
+
     // draw grid
     this.drawGrid();
 
@@ -82,17 +92,34 @@ export default class Play extends Phaser.Scene {
   }
 
   update() {
-    // simple player movement
-    this.movePlayer();
+    // test win condition is to collect 5 trees
+    if (this.collectedCrops.get("tree")! < 5) {
+      // simple player movement
+      this.movePlayer();
 
-    // plant a crop
-    if (this.place!.isDown) {
-      this.plant("tree");
-    }
+      // plant a crop
+      if (this.place!.isDown) {
+        this.plant("tree");
+      }
 
-    // collect a crop
-    if (this.collect!.isDown) {
-      this.collectPlant();
+      // collect a crop
+      if (this.collect!.isDown) {
+        this.collectPlant();
+      }
+    } else {
+      this.winText = this.add
+        .text(
+          (this.game.config.width as number) / 2,
+          (this.game.config.height as number) / 2,
+          "You Win!\n\nPress [SPACE] to restart.\n\n",
+          this.textConfig,
+        )
+        .setOrigin(0.5);
+
+      if (this.place!.isDown) {
+        this.scene.stop();
+        this.scene.start("menu");
+      }
     }
   }
 
