@@ -107,6 +107,7 @@ export default class Play extends Phaser.Scene {
         this.collectPlant();
       }
     } else {
+      this.player!.stopMoving();
       this.winText = this.add
         .text(
           (this.game.config.width as number) / 2,
