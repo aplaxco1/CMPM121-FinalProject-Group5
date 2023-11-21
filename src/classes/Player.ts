@@ -25,8 +25,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   setCurrCell() {
-    let x = Math.floor(this.x / this.cellWidth!);
-    let y = Math.floor(this.y / this.cellHeight!);
+    const x = Math.floor(this.x / this.cellWidth!);
+    const y = Math.floor(this.y / this.cellHeight!);
     this.currCell = { x: x, y: y };
   }
 
@@ -34,28 +34,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (!this.body!.blocked.left) {
       this.setVelocityX(-this.moveSpeed);
     }
+    this.anims.play("walk_left", true);
   }
 
   moveRight() {
     if (!this.body!.blocked.right) {
       this.setVelocityX(this.moveSpeed);
     }
+    this.anims.play("walk_right", true);
   }
 
   moveUp() {
     if (!this.body!.blocked.up) {
       this.setVelocityY(-this.moveSpeed);
     }
+    this.anims.play("walk_up", true);
   }
 
   moveDown() {
     if (!this.body!.blocked.down) {
       this.setVelocityY(this.moveSpeed);
     }
+    this.anims.play("walk_down", true);
   }
 
   stopMoving() {
     this.setVelocityX(0);
     this.setVelocityY(0);
+    this.anims.play("idle_down", true);
   }
 }

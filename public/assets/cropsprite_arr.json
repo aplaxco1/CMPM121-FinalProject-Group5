@@ -1,382 +1,382 @@
 {
-    "frames": [
-        {
-            "filename": "strawberry6",
-            "frame": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "strawberry5",
-            "frame": {
-                "x": 16,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "strawberry4",
-            "frame": {
-                "x": 32,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "strawberry3",
-            "frame": {
-                "x": 48,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "strawberry2",
-            "frame": {
-                "x": 64,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "strawberry1",
-            "frame": {
-                "x": 80,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato6",
-            "frame": {
-                "x": 0,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato5",
-            "frame": {
-                "x": 16,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato4",
-            "frame": {
-                "x": 32,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato3",
-            "frame": {
-                "x": 48,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato2",
-            "frame": {
-                "x": 64,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Potato1",
-            "frame": {
-                "x": 80,
-                "y": 16,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn6",
-            "frame": {
-                "x": 0,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn5",
-            "frame": {
-                "x": 16,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn4",
-            "frame": {
-                "x": 32,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn3",
-            "frame": {
-                "x": 48,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn2",
-            "frame": {
-                "x": 64,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        },
-        {
-            "filename": "Corn1",
-            "frame": {
-                "x": 80,
-                "y": 32,
-                "w": 16,
-                "h": 16
-            },
-            "rotated": false,
-            "trimmed": false,
-            "spriteSourceSize": {
-                "x": 0,
-                "y": 0,
-                "w": 16,
-                "h": 16
-            },
-            "sourceSize": {
-                "w": 16,
-                "h": 16
-            }
-        }
-    ]
+  "frames": [
+    {
+      "filename": "strawberry6",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "strawberry5",
+      "frame": {
+        "x": 16,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "strawberry4",
+      "frame": {
+        "x": 32,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "strawberry3",
+      "frame": {
+        "x": 48,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "strawberry2",
+      "frame": {
+        "x": 64,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "strawberry1",
+      "frame": {
+        "x": 80,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato6",
+      "frame": {
+        "x": 0,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato5",
+      "frame": {
+        "x": 16,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato4",
+      "frame": {
+        "x": 32,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato3",
+      "frame": {
+        "x": 48,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato2",
+      "frame": {
+        "x": 64,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Potato1",
+      "frame": {
+        "x": 80,
+        "y": 16,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn6",
+      "frame": {
+        "x": 0,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn5",
+      "frame": {
+        "x": 16,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn4",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn3",
+      "frame": {
+        "x": 48,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn2",
+      "frame": {
+        "x": 64,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    },
+    {
+      "filename": "Corn1",
+      "frame": {
+        "x": 80,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 16
+      }
+    }
+  ]
 }

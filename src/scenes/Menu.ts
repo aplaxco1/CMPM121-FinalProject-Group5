@@ -15,7 +15,7 @@ export default class Menu extends Phaser.Scene {
   }
 
   create() {
-    let menuConfig = {
+    const menuConfig = {
       align: "center",
       fontSize: "28px",
     };

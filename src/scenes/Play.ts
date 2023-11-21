@@ -4,7 +4,7 @@ import { Crop } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
-const UIBarHeight: number = 120;
+const uIBarHeight: number = 120;
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
@@ -47,7 +47,7 @@ export default class Play extends Phaser.Scene {
       0,
       0,
       this.game.config.width as number,
-      (this.game.config.height as number) - UIBarHeight,
+      (this.game.config.height as number) - uIBarHeight,
     );
 
     // draw grid
@@ -57,9 +57,9 @@ export default class Play extends Phaser.Scene {
     this.add
       .rectangle(
         0,
-        (this.game.config.height as number) - UIBarHeight,
+        (this.game.config.height as number) - uIBarHeight,
         this.game.config.width as number,
-        UIBarHeight,
+        uIBarHeight,
         0xffffff,
       )
       .setOrigin(0, 0);
@@ -86,7 +86,7 @@ export default class Play extends Phaser.Scene {
   }
 
   movePlayer() {
-    let canMove = this.canMove();
+    const canMove = this.canMove();
     if (this.right!.isDown && canMove) {
       this.player!.moveRight();
     } else if (this.left!.isDown && canMove) {
@@ -104,7 +104,7 @@ export default class Play extends Phaser.Scene {
   // prevents diagonal movement
   canMove(): boolean {
     let count = 0;
-    for (let key of this.movementInputs!) {
+    for (const key of this.movementInputs!) {
       if (key.isDown) {
         count += 1;
       }
@@ -116,10 +116,10 @@ export default class Play extends Phaser.Scene {
   }
 
   plant(plant: string) {
-    let pos =
+    const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
     if (!this.plantMap.get(JSON.stringify(pos))) {
-      let newPlant = new Crop(this, pos.x, pos.y, plant, plant, 1, 1)
+      const newPlant = new Crop(this, pos.x, pos.y, plant, plant, 1, 1)
         .setScale(0.1)
         .setOrigin(0, 0);
       this.plantMap.set(JSON.stringify(pos), newPlant);
@@ -133,15 +133,15 @@ export default class Play extends Phaser.Scene {
       x < (this.game.config.width as number) / gridCellWidth;
       x++
     ) {
-      let currCol: { x: number; y: number }[] = [];
+      const currCol: { x: number; y: number }[] = [];
       for (
         let y = 0;
         y <
-        ((this.game.config.height as number) - UIBarHeight) / gridCellHeight;
+        ((this.game.config.height as number) - uIBarHeight) / gridCellHeight;
         y++
       ) {
-        let currX = x * gridCellWidth;
-        let currY = y * gridCellHeight;
+        const currX = x * gridCellWidth;
+        const currY = y * gridCellHeight;
         currCol.push({ x: currX, y: currY });
         const cellRect = this.add
           .rectangle(currX, currY, gridCellWidth, gridCellHeight, 0x34ba58)
