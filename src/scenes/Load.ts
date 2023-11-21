@@ -3,6 +3,8 @@ import * as Phaser from "phaser";
 import playerspriteURL from "/assets/playersprite.png";
 import playerspritemapURL from "/assets/playersprite_map.json?url";
 import plantTestURL from "/assets/tempemojidonotuse.png";
+import cropspriteURL from "/assets/crops.png";
+import cropspritemapURL from "/assets/cropsprite_arr.json?url";
 
 export default class Load extends Phaser.Scene {
   constructor() {
@@ -12,6 +14,7 @@ export default class Load extends Phaser.Scene {
   preload() {
     // load player spritesheet
     this.load.atlas("player_atlas", playerspriteURL, playerspritemapURL);
+    this.load.atlas("crop_atlas", cropspriteURL, cropspritemapURL);
     this.load.image("tree", plantTestURL);
   }
 

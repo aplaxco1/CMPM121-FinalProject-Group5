@@ -1,4 +1,4 @@
-interface cropOption {
+export interface cropOption {
   cropName: string;
   growthRate: number;
   sunLevel: number;
@@ -9,17 +9,15 @@ interface cropOption {
 
 export class Crop extends Phaser.GameObjects.Sprite {
   cropData?: cropOption;
-  growthLevel: number = 0;
+  cropSprite: Phaser.GameObjects.Sprite;
+  growthLevel: number = 1;
 
-  constructor(
-    scene: Phaser.Scene,
-    x: number,
-    y: number,
-    texture: string,
-    crop: cropOption,
-  ) {
-    super(scene, x, y, texture);
-    scene.add.existing(this);
+  constructor(scene: Phaser.Scene, x: number, y: number, crop: cropOption) {
+    const texture = "crop_atlas";
+    const frame = crop.cropName + "1";
+
+    super(scene, x, y, texture, frame);
+    this.cropSprite = scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setSize(30, 30);
 
@@ -45,5 +43,20 @@ export class Crop extends Phaser.GameObjects.Sprite {
     return this.growthLevel;
   }
 
-  increaseGrowthLevel(): void {}
+  increaseGrowthLevel(): void {
+    const maxGrowthLevel = 6;
+
+    if (this.growthLevel >= maxGrowthLevel) {
+      this.growthLevel = maxGrowthLevel;
+      console.log(this.growthLevel);
+    } else {
+      this.growthLevel++;
+    }
+  }
+
+  grow(): void {
+    this.increaseGrowthLevel();
+    const frame = this.cropData!.cropName + this.growthLevel.toString();
+    this.cropSprite.setFrame(frame);
+  }
 }

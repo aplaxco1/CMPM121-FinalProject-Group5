@@ -1,7 +1,7 @@
 {
   "frames": [
     {
-      "filename": "strawberry6",
+      "filename": "Strawberry6",
       "frame": {
         "x": 0,
         "y": 0,
@@ -22,7 +22,7 @@
       }
     },
     {
-      "filename": "strawberry5",
+      "filename": "Strawberry5",
       "frame": {
         "x": 16,
         "y": 0,
@@ -43,7 +43,7 @@
       }
     },
     {
-      "filename": "strawberry4",
+      "filename": "Strawberry4",
       "frame": {
         "x": 32,
         "y": 0,
@@ -64,7 +64,7 @@
       }
     },
     {
-      "filename": "strawberry3",
+      "filename": "Strawberry3",
       "frame": {
         "x": 48,
         "y": 0,
@@ -85,7 +85,7 @@
       }
     },
     {
-      "filename": "strawberry2",
+      "filename": "Strawberry2",
       "frame": {
         "x": 64,
         "y": 0,
@@ -106,7 +106,7 @@
       }
     },
     {
-      "filename": "strawberry1",
+      "filename": "Strawberry1",
       "frame": {
         "x": 80,
         "y": 0,

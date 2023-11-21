@@ -1,58 +1,54 @@
 import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
-import { Crop } from "../classes/Crop.ts";
+import { Crop, cropOption } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 120;
 
-interface cropOption {
-  cropName: string;
-  growthRate: number;
-  sunLevel: number;
-  waterLevel: number;
-  spaceNeeded: number;
-  cropToAvoid: string;
-}
-
 const cropOptions: cropOption[] = [
   {
-    cropName: "strawberry",
+    cropName: "Strawberry",
     growthRate: 5,
+
     sunLevel: 2,
     waterLevel: 3,
     spaceNeeded: 0,
-    cropToAvoid: "potato",
+    cropToAvoid: "Potato",
   },
   {
-    cropName: "potato",
+    cropName: "Potato",
     growthRate: 4,
+
     sunLevel: 3,
     waterLevel: 4,
     spaceNeeded: 1,
     cropToAvoid: "",
   },
   {
-    cropName: "corn",
+    cropName: "Corn",
     growthRate: 6,
+
     sunLevel: 4,
     waterLevel: 2,
     spaceNeeded: 1,
-    cropToAvoid: "strawberry",
+    cropToAvoid: "Strawberry",
   },
 ];
 
-// TEMPORARY TREE CROP WHILE IN PROGRESS
-const treeCrop: cropOption = {
-  cropName: "tree",
-  growthRate: 8,
+// TEMPORARY CROP WHILE IN PROGRESS
+
+const stawberry: cropOption = {
+  cropName: "Strawberry",
+  growthRate: 5,
+
   sunLevel: 2,
   waterLevel: 3,
-  spaceNeeded: 2,
-  cropToAvoid: "",
+  spaceNeeded: 0,
+  cropToAvoid: "Potato",
 };
 
-console.log(cropOptions);
+//console.log(cropOptions);
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
@@ -125,7 +121,7 @@ export default class Play extends Phaser.Scene {
     );
 
     // initialize collected crops to zero
-    this.collectedCrops.set(treeCrop.cropName, 0);
+    this.collectedCrops.set(cropOptions[0].cropName, 0);
 
     // draw grid
     this.drawGrid();
@@ -155,13 +151,16 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (this.collectedCrops.get(treeCrop.cropName)! < 5 && !this.sleeping) {
+    if (
+      this.collectedCrops.get(cropOptions[0].cropName)! < 5 &&
+      !this.sleeping
+    ) {
       // simple player movement
       this.movePlayer();
 
       // plant a crop
       if (this.place!.isDown) {
-        this.plant(treeCrop);
+        this.plant(stawberry);
       }
 
       // collect a crop
@@ -232,9 +231,9 @@ export default class Play extends Phaser.Scene {
       !this.cropMap.get(JSON.stringify(pos)) ||
       this.cropMap.get(JSON.stringify(pos)) == null
     ) {
-      const newPlant = new Crop(this, pos.x, pos.y, crop.cropName, crop)
-        .setScale(0.1)
-        .setOrigin(0, 0);
+      const newPlant = new Crop(this, pos.x, pos.y, crop)
+        .setOrigin(0, 0)
+        .setScale(2);
       this.cropMap.set(JSON.stringify(pos), newPlant);
     }
   }
@@ -261,6 +260,7 @@ export default class Play extends Phaser.Scene {
   }
   playerWake() {
     // GROW PLANTS HERE ONCE IMPLEMENTED (iterate through map -> grow if not null)
+    this.growPlants();
     this.randomizeConditions();
     console.log(
       "Sun Level = " + this.currentSunLevel,
@@ -292,6 +292,14 @@ export default class Play extends Phaser.Scene {
       }
       this.gridCells?.push(currCol);
     }
+  }
+
+  growPlants() {
+    this.cropMap.forEach((newCrop) => {
+      if (newCrop != null) {
+        newCrop.grow();
+      }
+    });
   }
 
   randomizeConditions() {
