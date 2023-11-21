@@ -92,3 +92,17 @@ traditional JavaScript. We are also hoping to combine the knowledge that we have
 so to create a project in a way that expands upon our past experiences by utilizing more complex tools and structures. In addition to this, we are also hoping to gain more experience of programming collaboratively,
 and to learn the best practices of managing various game factors while keeping the code readable and flexible between group members. Lastly, in a more general sense, we wish to gain a deeper understanding
 of game development in a team environment.
+
+# Devlog Entry 02 - 11/22/2023
+
+## How We Satisfied Softwate Requirements [F0]
+- [F0.a] You control a character moving on a 2D grid
+- [F0.b] You advance time in the turn-based simulation manually.
+- [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them.
+- [F0.d] Grid cells have sun and water levels. The incoming sun and water for each cell is somehow randomly generated each turn. Sun energy cannot be stored in a cell (it is used immediately or lost)
+  while water moisture can be slowly accumulated over several turns.
+- [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”).
+- [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions).
+- [F0.g] A play scenario is completed when some condition is satisfied (e.g. at least X plants at growth level Y or above).
+
+## Reflection
