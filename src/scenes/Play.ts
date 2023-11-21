@@ -6,6 +6,15 @@ const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 120;
 
+interface cropOption {
+  cropName: string;
+  growthRate: number;
+  sunLevel: number;
+  waterLevel: number;
+  spaceNeeded: number;
+  cropToAvoid: string;
+}
+
 const cropOptions: cropOption[] = [
   {
     cropName: "strawberry",

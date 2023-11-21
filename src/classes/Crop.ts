@@ -1,3 +1,12 @@
+interface cropOption {
+  cropName: string;
+  growthRate: number;
+  sunLevel: number;
+  waterLevel: number;
+  spaceNeeded: number;
+  cropToAvoid: string;
+}
+
 export class Crop extends Phaser.GameObjects.Sprite {
   cropData?: cropOption;
   growthLevel: number = 0;
