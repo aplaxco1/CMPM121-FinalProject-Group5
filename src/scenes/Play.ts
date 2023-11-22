@@ -74,6 +74,8 @@ export default class Play extends Phaser.Scene {
   collect?: Phaser.Input.Keyboard.Key;
   // to progress turn
   sleep?: Phaser.Input.Keyboard.Key;
+  // to restart
+  restart?: Phaser.Input.Keyboard.Key;
 
   // UI text
   textConfig = {
@@ -103,7 +105,8 @@ export default class Play extends Phaser.Scene {
     this.placeCrop1 = this.#addKey("ONE");
     this.placeCrop2 = this.#addKey("TWO");
     this.placeCrop3 = this.#addKey("THREE");
-    this.collect = this.#addKey("SPACE");
+    this.collect = this.#addKey("H");
+    this.restart = this.#addKey("SPACE");
     this.sleep = this.#addKey("S");
     this.movementInputs = [this.right, this.left, this.up, this.down];
 
@@ -147,7 +150,7 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[SPACE] - Harvest\n[S] - Sleep (Progress Turn)\n\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n\nCurrent Objective: Harvet 5 Starberries",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -211,7 +214,7 @@ export default class Play extends Phaser.Scene {
         )
         .setOrigin(0.5);
 
-      if (this.collect!.isDown) {
+      if (this.restart!.isDown) {
         this.scene.stop();
         this.scene.start("menu");
       }
