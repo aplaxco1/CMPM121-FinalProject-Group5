@@ -10,7 +10,6 @@ const cropOptions: cropOption[] = [
   {
     cropName: "Strawberry",
     growthRate: 5,
-
     sunLevel: 2,
     waterLevel: 3,
     spaceNeeded: 0,
@@ -19,7 +18,6 @@ const cropOptions: cropOption[] = [
   {
     cropName: "Potato",
     growthRate: 4,
-
     sunLevel: 3,
     waterLevel: 4,
     spaceNeeded: 1,
@@ -28,7 +26,6 @@ const cropOptions: cropOption[] = [
   {
     cropName: "Corn",
     growthRate: 6,
-
     sunLevel: 4,
     waterLevel: 2,
     spaceNeeded: 1,
@@ -37,18 +34,16 @@ const cropOptions: cropOption[] = [
 ];
 
 // TEMPORARY CROP WHILE IN PROGRESS
-
 const stawberry: cropOption = {
   cropName: "Strawberry",
   growthRate: 5,
-
   sunLevel: 2,
   waterLevel: 3,
   spaceNeeded: 0,
   cropToAvoid: "Potato",
 };
 
-//console.log(cropOptions);
+console.log(cropOptions);
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
@@ -121,7 +116,7 @@ export default class Play extends Phaser.Scene {
     );
 
     // initialize collected crops to zero
-    this.collectedCrops.set(cropOptions[0].cropName, 0);
+    this.collectedCrops.set(stawberry.cropName, 0);
 
     // draw grid
     this.drawGrid();
@@ -151,10 +146,7 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (
-      this.collectedCrops.get(cropOptions[0].cropName)! < 5 &&
-      !this.sleeping
-    ) {
+    if (this.collectedCrops.get(stawberry.cropName)! < 5 && !this.sleeping) {
       // simple player movement
       this.movePlayer();
 
@@ -260,8 +252,8 @@ export default class Play extends Phaser.Scene {
   }
   playerWake() {
     // GROW PLANTS HERE ONCE IMPLEMENTED (iterate through map -> grow if not null)
-    this.growPlants();
     this.randomizeConditions();
+    this.growPlants();
     console.log(
       "Sun Level = " + this.currentSunLevel,
       "Water Level = " + this.currentWaterLevel,
@@ -297,7 +289,7 @@ export default class Play extends Phaser.Scene {
   growPlants() {
     this.cropMap.forEach((newCrop) => {
       if (newCrop != null) {
-        newCrop.grow();
+        newCrop.grow(this.currentWaterLevel!, this.currentSunLevel!);
       }
     });
   }

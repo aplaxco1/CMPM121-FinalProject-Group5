@@ -19,8 +19,9 @@ export class Crop extends Phaser.GameObjects.Sprite {
     super(scene, x, y, texture, frame);
     this.cropSprite = scene.add.existing(this);
     scene.physics.add.existing(this);
+    //scene.physics.add.existing(this.cropSprite);
     this.setSize(30, 30);
-
+    this.cropAnimation(scene);
     this.cropData = crop;
   }
 
@@ -48,15 +49,35 @@ export class Crop extends Phaser.GameObjects.Sprite {
 
     if (this.growthLevel >= maxGrowthLevel) {
       this.growthLevel = maxGrowthLevel;
-      console.log(this.growthLevel);
     } else {
       this.growthLevel++;
     }
   }
 
-  grow(): void {
-    this.increaseGrowthLevel();
+  checkNutrients(sun: number, water: number): boolean {
+    if (sun >= this.cropData!.sunLevel && water >= this.cropData!.waterLevel) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  grow(water: number, sun: number): void {
+    if (this.checkNutrients(sun, water)) {
+      this.increaseGrowthLevel();
+    }
+    console.log(this.growthLevel);
     const frame = this.cropData!.cropName + this.growthLevel.toString();
     this.cropSprite.setFrame(frame);
+  }
+
+  cropAnimation(scene: Phaser.Scene): void {
+    scene.tweens.add({
+      targets: this.cropSprite,
+      y: { from: this.y, to: this.y - 2 },
+      yoyo: true,
+      duration: 1000,
+      repeat: -1,
+    });
   }
 }
