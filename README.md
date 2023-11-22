@@ -97,13 +97,61 @@ of game development in a team environment.
 
 ## How We Satisfied Softwate Requirements [F0]
 
-- [F0.a] You control a character moving on a 2D grid
-- [F0.b] You advance time in the turn-based simulation manually.
-- [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them.
+- [F0.a] You control a character moving on a 2D grid:
+
+  Thus far in development, the player has control over a 2D sprite, which they can move in 4 different directions on the screen using the arrow keys. The game world is currently split up in a grid like
+  pattern, where each grid cell is 30x30. The player's movement is not contained explicity to the bounds of each cell, as they can move in any way they wish with their limited 4 directional movement, as we
+  wanted the player to have more direct control over their movements through the game world, the primary gardening mechanics themselves are restricted to this grid based pattern, and the player can only plant
+  crops within the bounds of each grid cell. Though not required, we also have some directional walking and idle animations set up for the player, to give a bit more life to the scene rather then having a
+  completely static controllable character. The controllable sprite we have now is only temporary, and we have the final spritesheet animations already set up, but we will implement this more polished version
+  later on.
+  
+- [F0.b] You advance time in the turn-based simulation manually:
+
+  Within our game, we have a "sleeping" mechanic, which allows the player to progress time forwards to the next day. In order to do this, the player can press the "S" key to progress to the next turn, which is
+  when the new eather conditions for the next day are randomized, and how plants are enabled to grow over time. Rather than having a contsant update() loop to progress the game and change its state (aside from
+  where the player chooses to plant crops), this mechanic serves to advance time within the game forwards in a sort of turn-based simulation whenever the player chooses to do so.
+  
+- [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them:
+
+  As the player moves through the gird, the cell that they are currently standing within the bounds of is calculated and updated to reflect their current position. Based on what grid cell the player is standing
+  on, if the player presses a key to "plant" one of their selection of crops (right now these are the "1", "2", and "3" keys on the keyboard), which will create a new crop within whatever grid cell they are
+  within the bounds of. In order to "gather"/"harvest" these crops, if the player can press the "Space" key in order to remove a crop from the grid, if there currently exists a crop in the particular grid cell
+  they are standing on. In order to store the information of which crop is placed in which grid cell, we are utilizing a map, which uses the numbered (row, collumn) grid cell as a key, and maps it to the newly
+  created crop. When a player gathers a crop, its sprite will be removed from the scene and the grid cell will be set to null within the map. The crop will only count as "collected" and added to their inventory
+  of crops if it was fully grown when the player harvested it.
+  
 - [F0.d] Grid cells have sun and water levels. The incoming sun and water for each cell is somehow randomly generated each turn. Sun energy cannot be stored in a cell (it is used immediately or lost)
-  while water moisture can be slowly accumulated over several turns.
-- [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”).
-- [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions).
-- [F0.g] A play scenario is completed when some condition is satisfied (e.g. at least X plants at growth level Y or above).
+  while water moisture can be slowly accumulated over several turns:
+
+  For each grid cell in our game, they each have the same sun and water levels as generated each turn when the player chooses to "sleep". For this particular mechanic, when the player sleeps within the game,
+  the sun level for the next day when they awaken is randomized to a new integer, while the water level is instead calculated based on a random chance of rain. If it rains when while the player sleeps and
+  progresses to the next turn, there is a random chance of rain, which will set the water level to its highest for that day. As time progresses without rain, this water level will slowly decrease back down to
+  its lowest value unless it rains again during that period of time. in tjis sense, the sun level is randomly selected each day, while the water level is randomly increased if a certain random event occurs and
+  decrements over time as the rain water dries up.
+  
+- [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”):
+
+  Within our game, we have a generic crop class which describes the crops growth, and contains functions to allow it to grow each time that the player sleeps. Based on which of the crops that the player decides
+  to plant a crop in a particular grid cell, which, as of now includes strawberries, potatoes, and corn as the three different types of plants, specific data, like the crop name and growth conditions are passed
+  to the newly created crop, which will influence the sprites that it uses to represent itself on the grid, and also determines whether or not the crop will be able to grow based on the weather conditions of the
+  current turn. When these crop type specific conditions are met, its growth level will increase from level 1 to level 6, and the crop type specific sprite used to represent that crop will change to reflect
+  this growth level.
+  
+- [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions):
+
+  As we have it set up now, each turn, all of the crops currently on the grid will attempt to grow and increase their growth level. However, these crops will only grow if the generated sun level and water level
+  of the crop's current grid cell meets the specific crop type's needed minimum numerical water and sun levels, though, as of now, each grid cell posseses the same global value of sun and water levels, as we
+  though that best fit the theme of our game. If these conditions are not satisfied, then the plant will not be able to progress its growth, and its current sprite representation and growth level will remain
+  stagnant, until the next turn that both of these conditions are correctly met. Of course, these requirements are different per crop type, so this means that some crops will likely end up growing fatser than
+  others and will grow at different rates, depending upon their minimum necessary sun and water levels.
+  
+- [F0.g] A play scenario is completed when some condition is satisfied (e.g. at least X plants at growth level Y or above):
+
+  Thus far in development, we have a temporary condition that needs to be satisfied in order for the player to complete the gameplay scenario, that being, to harvest five fully grown strawberries. When a player
+  harvests crops, if this crop is fully grown, the overall count of how many of that particular crop type they have harvested increases, so in order to check if the player has satified the win condition, we
+  check if the current count within their inventory for the particular plant has met the needed number. When the player does satisfy these conditions, they are given a "You win!" message and prompted to restart
+  the game from the begining again. This logic is temporary for now, as we will likely change the particular conditions that the player needs to satisfy, and possibly add multiple conditions or stages of
+  requirements to complete a play scenario.
 
 ## Reflection
