@@ -155,3 +155,23 @@ of game development in a team environment.
   requirements to complete a play scenario.
 
 ## Reflection
+
+Over the course of implementing each of the F0 requirements while we have decided to stick with utilizng the Phaser framework and the TypeScript language in the creation of this gardening game, we did encounter
+a few issues regarding the ways in which we had initially set uo the project, and our expectations regarding the transition from using JavaScript to TypeScript in a Phaser project. As dependencies when using
+TypeScript as compared to JavaScript work a bit differently, we did face a few complications with our initial expectations regarding how global variables fundtion. In past Phaser projects, when using 
+JavaScript, we would simply define global variables in the main.js file, and those could be changed and accessed by any scene within the game, but global variables work much differently in TypeScript. Which impacted how we approached defining and altering variables used by different Phaser scenes and prefabs. In addition to this, we did also have to become more accustumed to the ways in which Phaser objects need
+to be defined in TypeScript, as the specific types or variables need to be more specifically defined and maintained than they do in JavaScript. However, after becoming accustomed to these differences throughout
+the course of fuffilling the F0 requirements, we found this engine still suitable to continue working with.
+
+Besides some complications with getting adjusted to our game engine of choice, we also did move around some group member roles a bit, or at least, we naturally ended up taking on some different responsibilities
+than originally planned. While we had both a design lead and art lead, we had originally planned on having our art lead take on most of the reponsibilities when it came to art asset creation and implementation,
+but our design lead ended up creating all of the spritesheets, both temporary and final, for our player sprite and the spritesheet for the growth progression of each of our crops. In turn, our original art lead ended up creating much of the design documentation to outline our gameplay mechanics and structures. Our engine lead also ended up accounting for some of our tools lead's responsibilities while getting the engine set up for the group to use, while also enstablishing the framework to use the tools we chose to utilize. The engine lead also helped solve some issues regarding the tools utilized, specifically in regards to how the group was utilize github to create deployments of the game. So, we did end up having some role adjustments as we started getting some work done on the project and naturally started to settle
+into roles that best fit the responsibilities we each wished to be accountable for.
+
+Lastly, we have done a bit of re-evaluating on the scope of our game. Originally, we had proposed to do a upgrade system as a sort of unique feature that we wanted to implement, while also focusing a bit on our
+visual style with polished pixel art. During this stage of the project, it took quite a bit of time to get the framework of the game and its basic mechanics all implemented, more than we had originally
+anticipated. Even then, there are still a few more features that we wish to fine tune in the future, including having a few more specific spatial conditions outside of the sun and water levels that will
+influence how players interact with the game, and also adjusting how the sun and water level calculations work, to perhaps make the water level in particular different per cell to add a bit more variety. So in
+this case, we may want to rethink the idea of having additional mechanics like the proposed upgrade system, as it might take too much time to implement when we want to focus more on polshing up our already
+existing mechanics. We are however, content with the progress of our visual assests, including the player and crop spritesheets and animations, so we are planning on continuing to create more of these assets to
+even further develop the art and visuals of our game.
