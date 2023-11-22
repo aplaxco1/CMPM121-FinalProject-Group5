@@ -116,6 +116,7 @@ export default class Play extends Phaser.Scene {
     );
 
     // randomize global sun and water levels
+    this.currentWaterLevel = 0;
     this.randomizeConditions();
     console.log(
       "Sun Level = " + this.currentSunLevel,
@@ -328,7 +329,12 @@ export default class Play extends Phaser.Scene {
 
   randomizeConditions() {
     this.currentSunLevel = randomInt(1, 5);
-    this.currentWaterLevel = randomInt(1, 5);
+    if (Math.random() < 0.3) {
+      this.currentWaterLevel = randomInt(3, 5);
+      console.log("It rained!");
+    } else if (this.currentWaterLevel! > 1) {
+      this.currentWaterLevel! -= 1;
+    }
   }
 }
 
