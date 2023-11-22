@@ -24,7 +24,7 @@ export default class Menu extends Phaser.Scene {
       .text(
         (this.game.config.width as number) / 2,
         (this.game.config.height as number) / 2,
-        "CMPM 121 - Final Project\nGardening Game\n\nPress [SPACE] to play.\n\n ←↑→↓ to move \n[space] to plant",
+        "CMPM 121 - Final Project\nGardening Game\n\nPress [SPACE] to play.",
         menuConfig,
       )
       .setOrigin(0.5);

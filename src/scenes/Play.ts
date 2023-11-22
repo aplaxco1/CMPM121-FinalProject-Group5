@@ -34,14 +34,14 @@ const cropOptions: cropOption[] = [
 ];
 
 // TEMPORARY CROP WHILE IN PROGRESS
-const stawberry: cropOption = {
-  cropName: "Strawberry",
-  growthRate: 5,
-  sunLevel: 2,
-  waterLevel: 3,
-  spaceNeeded: 0,
-  cropToAvoid: "Potato",
-};
+// const stawberry: cropOption = {
+//   cropName: "Strawberry",
+//   growthRate: 5,
+//   sunLevel: 2,
+//   waterLevel: 3,
+//   spaceNeeded: 0,
+//   cropToAvoid: "Potato",
+// };
 
 console.log(cropOptions);
 
@@ -66,7 +66,10 @@ export default class Play extends Phaser.Scene {
   up?: Phaser.Input.Keyboard.Key;
   down?: Phaser.Input.Keyboard.Key;
   // for placing plants
-  place?: Phaser.Input.Keyboard.Key;
+  //place?: Phaser.Input.Keyboard.Key;
+  placeCrop1?: Phaser.Input.Keyboard.Key;
+  placeCrop2?: Phaser.Input.Keyboard.Key;
+  placeCrop3?: Phaser.Input.Keyboard.Key;
   // for collecting plants
   collect?: Phaser.Input.Keyboard.Key;
   // to progress turn
@@ -78,6 +81,7 @@ export default class Play extends Phaser.Scene {
     fontSize: "28px",
   };
   winText?: Phaser.GameObjects.Text;
+  controlsText?: Phaser.GameObjects.Text;
 
   constructor() {
     super("play");
@@ -95,8 +99,11 @@ export default class Play extends Phaser.Scene {
     this.left = this.#addKey("LEFT");
     this.up = this.#addKey("UP");
     this.down = this.#addKey("DOWN");
-    this.place = this.#addKey("SPACE");
-    this.collect = this.#addKey("ENTER");
+    //this.place = this.#addKey("SPACE");
+    this.placeCrop1 = this.#addKey("ONE");
+    this.placeCrop2 = this.#addKey("TWO");
+    this.placeCrop3 = this.#addKey("THREE");
+    this.collect = this.#addKey("SPACE");
     this.sleep = this.#addKey("S");
     this.movementInputs = [this.right, this.left, this.up, this.down];
 
@@ -116,7 +123,9 @@ export default class Play extends Phaser.Scene {
     );
 
     // initialize collected crops to zero
-    this.collectedCrops.set(stawberry.cropName, 0);
+    for (let crop of cropOptions) {
+      this.collectedCrops.set(crop.cropName, 0);
+    }
 
     // draw grid
     this.drawGrid();
@@ -129,6 +138,16 @@ export default class Play extends Phaser.Scene {
         this.game.config.width as number,
         uIBarHeight,
         0xffffff,
+      )
+      .setOrigin(0, 0);
+
+    // add controls text to UI bar (temporary)
+    this.controlsText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight,
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[SPACE] - Harvest\n[S] - Sleep (Progress Turn)\n\nCurrent Objective: Harvet 5 Starberries",
+        { color: "0x000000" },
       )
       .setOrigin(0, 0);
 
@@ -146,13 +165,25 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (this.collectedCrops.get(stawberry.cropName)! < 5 && !this.sleeping) {
+    if (
+      this.collectedCrops.get(cropOptions[0].cropName)! < 5 &&
+      !this.sleeping
+    ) {
       // simple player movement
       this.movePlayer();
 
       // plant a crop
-      if (this.place!.isDown) {
-        this.plant(stawberry);
+      // if (this.place!.isDown) {
+      //   this.plant(stawberry);
+      // }
+      if (this.placeCrop1!.isDown) {
+        this.plant(cropOptions[0]);
+      }
+      if (this.placeCrop2!.isDown) {
+        this.plant(cropOptions[1]);
+      }
+      if (this.placeCrop3!.isDown) {
+        this.plant(cropOptions[2]);
       }
 
       // collect a crop
@@ -179,7 +210,7 @@ export default class Play extends Phaser.Scene {
         )
         .setOrigin(0.5);
 
-      if (this.place!.isDown) {
+      if (this.collect!.isDown) {
         this.scene.stop();
         this.scene.start("menu");
       }
@@ -235,13 +266,15 @@ export default class Play extends Phaser.Scene {
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
     const currCrop = this.cropMap.get(JSON.stringify(pos));
     if (currCrop != null) {
-      let cropCount = this.collectedCrops.get(currCrop.getPlantName());
-      if (cropCount) {
-        cropCount += 1;
-      } else {
-        cropCount = 1;
+      if (currCrop.growthLevel == 6) {
+        let cropCount = this.collectedCrops.get(currCrop.getPlantName());
+        if (cropCount) {
+          cropCount += 1;
+        } else {
+          cropCount = 1;
+        }
+        this.collectedCrops.set(currCrop.getPlantName(), cropCount);
       }
-      this.collectedCrops.set(currCrop.getPlantName(), cropCount);
       this.cropMap.set(JSON.stringify(pos), null);
       currCrop.destroy();
     }
@@ -251,7 +284,6 @@ export default class Play extends Phaser.Scene {
     this.cameras.main.fadeIn(1000);
   }
   playerWake() {
-    // GROW PLANTS HERE ONCE IMPLEMENTED (iterate through map -> grow if not null)
     this.randomizeConditions();
     this.growPlants();
     console.log(
