@@ -6,6 +6,12 @@ const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 120;
 
+interface cellData {
+  x: number;
+  y: number;
+  waterLevel: number;
+}
+
 const cropOptions: cropOption[] = [
   {
     cropName: "Strawberry",
@@ -33,21 +39,11 @@ const cropOptions: cropOption[] = [
   },
 ];
 
-// TEMPORARY CROP WHILE IN PROGRESS
-// const stawberry: cropOption = {
-//   cropName: "Strawberry",
-//   growthRate: 5,
-//   sunLevel: 2,
-//   waterLevel: 3,
-//   spaceNeeded: 0,
-//   cropToAvoid: "Potato",
-// };
-
 console.log(cropOptions);
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
-  gridCells?: { x: number; y: number }[][] = [];
+  gridCells?: cellData[][] = [];
   // plantMap stores whatever plant exists at the current [row][col] grid cell
   cropMap: Map<string, Crop | null> = new Map();
   player?: Player;
@@ -55,7 +51,6 @@ export default class Play extends Phaser.Scene {
 
   // current global conditions across all cells
   currentSunLevel?: number;
-  currentWaterLevel?: number;
   sleeping: boolean = false;
 
   // list of keyboard inputs //
@@ -118,13 +113,9 @@ export default class Play extends Phaser.Scene {
       (this.game.config.height as number) - uIBarHeight,
     );
 
-    // randomize global sun and water levels
-    this.currentWaterLevel = 0;
+    // randomize global sun and water level
     this.randomizeConditions();
-    console.log(
-      "Sun Level = " + this.currentSunLevel,
-      "Water Level = " + this.currentWaterLevel,
-    );
+    console.log("Sun Level = " + this.currentSunLevel);
 
     // initialize collected crops to zero
     for (let crop of cropOptions) {
@@ -254,21 +245,21 @@ export default class Play extends Phaser.Scene {
   plant(crop: cropOption) {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
+    const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
     if (
-      !this.cropMap.get(JSON.stringify(pos)) ||
-      this.cropMap.get(JSON.stringify(pos)) == null
+      !this.cropMap.get(JSON.stringify(key)) ||
+      this.cropMap.get(JSON.stringify(key)) == null
     ) {
       const newPlant = new Crop(this, pos.x, pos.y, crop)
         .setOrigin(0, 0)
         .setScale(2);
-      this.cropMap.set(JSON.stringify(pos), newPlant);
+      this.cropMap.set(JSON.stringify(key), newPlant);
     }
   }
 
   collectPlant() {
-    const pos =
-      this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
-    const currCrop = this.cropMap.get(JSON.stringify(pos));
+    const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
+    const currCrop = this.cropMap.get(JSON.stringify(key));
     if (currCrop != null) {
       if (currCrop.growthLevel == 6) {
         let cropCount = this.collectedCrops.get(currCrop.getPlantName());
@@ -279,7 +270,7 @@ export default class Play extends Phaser.Scene {
         }
         this.collectedCrops.set(currCrop.getPlantName(), cropCount);
       }
-      this.cropMap.set(JSON.stringify(pos), null);
+      this.cropMap.set(JSON.stringify(key), null);
       currCrop.destroy();
     }
   }
@@ -290,10 +281,7 @@ export default class Play extends Phaser.Scene {
   playerWake() {
     this.randomizeConditions();
     this.growPlants();
-    console.log(
-      "Sun Level = " + this.currentSunLevel,
-      "Water Level = " + this.currentWaterLevel,
-    );
+    console.log("Sun Level = " + this.currentSunLevel);
     this.sleeping = false;
   }
 
@@ -303,7 +291,7 @@ export default class Play extends Phaser.Scene {
       x < (this.game.config.width as number) / gridCellWidth;
       x++
     ) {
-      const currCol: { x: number; y: number }[] = [];
+      const currCol: cellData[] = [];
       for (
         let y = 0;
         y <
@@ -312,7 +300,11 @@ export default class Play extends Phaser.Scene {
       ) {
         const currX = x * gridCellWidth;
         const currY = y * gridCellHeight;
-        currCol.push({ x: currX, y: currY });
+        currCol.push({
+          x: currX,
+          y: currY,
+          waterLevel: randomInt(1, 5),
+        });
         const cellRect = this.add
           .rectangle(currX, currY, gridCellWidth, gridCellHeight, 0x34ba58)
           .setOrigin(0, 0);
@@ -323,24 +315,41 @@ export default class Play extends Phaser.Scene {
   }
 
   growPlants() {
-    this.cropMap.forEach((newCrop) => {
+    this.cropMap.forEach((newCrop, key) => {
       if (newCrop != null) {
-        newCrop.grow(this.currentWaterLevel!, this.currentSunLevel!);
+        // get water level of cell
+        const cell = JSON.parse(key);
+        const cellWaterLevel = this.gridCells![cell.x][cell.y].waterLevel;
+        console.log(
+          "Cell " + [cell.x, cell.y] + " Water Level = " + cellWaterLevel,
+        );
+        newCrop.grow(cellWaterLevel, this.currentSunLevel!);
       }
     });
   }
 
   randomizeConditions() {
     this.currentSunLevel = randomInt(1, 5);
-    if (Math.random() < 0.3) {
-      this.currentWaterLevel = randomInt(3, 5);
+    const rained = Math.random() < 0.3;
+    if (rained) {
       console.log("It rained!");
-    } else if (this.currentWaterLevel! > 1) {
-      this.currentWaterLevel! -= 1;
+    }
+    this.setWaterLevelPerCell(rained);
+  }
+
+  setWaterLevelPerCell(rained: boolean) {
+    for (let col of this.gridCells!) {
+      for (let cell of col) {
+        if (rained) {
+          cell.waterLevel = randomInt(3, 5);
+        } else if (cell.waterLevel > 1) {
+          cell.waterLevel -= 1;
+        }
+      }
     }
   }
 }
 
 function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * max + min);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
