@@ -5,7 +5,7 @@ import { Crop, CropOption } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
-const uIBarHeight: number = 180;
+const uIBarHeight: number = 300;
 
 interface CellData {
   x: number;
@@ -146,7 +146,7 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[R] - Redo\nCurrent Objective: Harvet 5 Starberries",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
