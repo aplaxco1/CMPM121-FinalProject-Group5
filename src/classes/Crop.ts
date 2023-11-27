@@ -3,8 +3,7 @@ export interface cropOption {
   growthRate: number;
   sunLevel: number;
   waterLevel: number;
-  spaceNeeded: number;
-  cropToAvoid: string;
+  cropsToAvoid: string[];
 }
 
 export class Crop extends Phaser.GameObjects.Sprite {
@@ -54,16 +53,28 @@ export class Crop extends Phaser.GameObjects.Sprite {
     }
   }
 
-  checkNutrients(sun: number, water: number): boolean {
-    if (sun >= this.cropData!.sunLevel && water >= this.cropData!.waterLevel) {
+  checkNutrients(sun: number, water: number, adjacentCrops: string[]): boolean {
+    let badCropsNearby: boolean = false;
+    for (let crop of this.cropData!.cropsToAvoid) {
+      for (let nearbyCrop of adjacentCrops) {
+        if (crop == nearbyCrop) {
+          badCropsNearby = true;
+        }
+      }
+    }
+    if (
+      sun >= this.cropData!.sunLevel &&
+      water >= this.cropData!.waterLevel &&
+      !badCropsNearby
+    ) {
       return true;
     } else {
       return false;
     }
   }
 
-  grow(water: number, sun: number): void {
-    if (this.checkNutrients(sun, water)) {
+  grow(water: number, sun: number, adjacentCrops: string[]): void {
+    if (this.checkNutrients(sun, water, adjacentCrops)) {
       this.increaseGrowthLevel();
     }
     console.log(this.growthLevel);
