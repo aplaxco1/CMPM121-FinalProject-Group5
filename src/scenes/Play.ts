@@ -1,18 +1,19 @@
 import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
-import { Crop, cropOption } from "../classes/Crop.ts";
+import { CommandManager, MoveCommand } from "../classes/Command.ts";
+import { Crop, CropOption } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 180;
 
-interface cellData {
+interface CellData {
   x: number;
   y: number;
   waterLevel: number;
 }
 
-const cropOptions: cropOption[] = [
+const cropOptions: CropOption[] = [
   {
     cropName: "Strawberry",
     growthRate: 5,
@@ -38,7 +39,7 @@ const cropOptions: cropOption[] = [
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
-  gridCells?: cellData[][] = [];
+  gridCells?: CellData[][] = [];
   // plantMap stores whatever plant exists at the current [row][col] grid cell
   cropMap: Map<string, Crop | null> = new Map();
   player?: Player;
@@ -66,6 +67,8 @@ export default class Play extends Phaser.Scene {
   sleep?: Phaser.Input.Keyboard.Key;
   // to restart
   restart?: Phaser.Input.Keyboard.Key;
+  undo?: Phaser.Input.Keyboard.Key;
+  redo?: Phaser.Input.Keyboard.Key;
 
   // UI text
   textConfig = {
@@ -75,6 +78,9 @@ export default class Play extends Phaser.Scene {
   winText?: Phaser.GameObjects.Text;
   controlsText?: Phaser.GameObjects.Text;
   statusText?: Phaser.GameObjects.Text;
+
+  // Command Manager
+  commandManager: CommandManager = new CommandManager();
 
   constructor() {
     super("play");
@@ -100,6 +106,9 @@ export default class Play extends Phaser.Scene {
     this.restart = this.#addKey("SPACE");
     this.sleep = this.#addKey("S");
     this.movementInputs = [this.right, this.left, this.up, this.down];
+    // command keys
+    this.undo = this.#addKey("Z");
+    this.redo = this.#addKey("X");
 
     // set world bounds so player cannot move outside of them
     this.physics.world.setBounds(
@@ -114,7 +123,7 @@ export default class Play extends Phaser.Scene {
     console.log("Sun Level = " + this.currentSunLevel);
 
     // initialize collected crops to zero
-    for (let crop of cropOptions) {
+    for (const crop of cropOptions) {
       this.collectedCrops.set(crop.cropName, 0);
     }
 
@@ -197,6 +206,12 @@ export default class Play extends Phaser.Scene {
         this.time.delayedCall(1000, this.fadeIn, [], this);
         this.time.delayedCall(2000, this.playerWake, [], this);
       }
+
+      if (this.undo!.isDown) {
+        this.commandManager.undoCommand();
+      } else if (this.redo!.isDown) {
+        this.commandManager.redoCommand();
+      }
     } else if (!this.sleeping) {
       this.player!.stopMoving();
       this.winText = this.add
@@ -217,18 +232,31 @@ export default class Play extends Phaser.Scene {
 
   movePlayer() {
     const canMove = this.canMove();
+    const currX: number = this.player!.x;
+    const currY: number = this.player!.y;
+
     if (this.right!.isDown && canMove) {
       this.player!.moveRight();
+      this.moveCommand(currX, currY);
     } else if (this.left!.isDown && canMove) {
       this.player!.moveLeft();
+      this.moveCommand(currX, currY);
     } else if (this.up!.isDown && canMove) {
+      this.moveCommand(currX, currY);
       this.player!.moveUp();
     } else if (this.down!.isDown && canMove) {
+      this.moveCommand(currX, currY);
       this.player!.moveDown();
     } else {
       this.player!.stopMoving();
     }
+
     this.player!.setCurrCell();
+  }
+
+  moveCommand(prevX: number, prevY: number): void {
+    const moveCommand = new MoveCommand(this.player!, prevX, prevY);
+    this.commandManager.executeCommand(moveCommand);
   }
 
   // prevents diagonal movement
@@ -245,7 +273,7 @@ export default class Play extends Phaser.Scene {
     return true;
   }
 
-  plant(crop: cropOption) {
+  plant(crop: CropOption) {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
     const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
@@ -294,7 +322,7 @@ export default class Play extends Phaser.Scene {
       x < (this.game.config.width as number) / gridCellWidth;
       x++
     ) {
-      const currCol: cellData[] = [];
+      const currCol: CellData[] = [];
       for (
         let y = 0;
         y <
@@ -327,16 +355,16 @@ export default class Play extends Phaser.Scene {
           "Cell " + [cell.x, cell.y] + " Water Level = " + cellWaterLevel,
         );
         // get list of crops near this one
-        let adjacentCrops = this.getAdjacentCrops(cell);
+        const adjacentCrops = this.getAdjacentCrops(cell);
         console.log(adjacentCrops);
         newCrop.grow(cellWaterLevel, this.currentSunLevel!, adjacentCrops);
       }
     });
   }
 
-  getAdjacentCrops(cell: cellData): string[] {
-    let adjacentCrops: string[] = [];
-    let nearbyCells = [
+  getAdjacentCrops(cell: CellData): string[] {
+    const adjacentCrops: string[] = [];
+    const nearbyCells = [
       { x: cell.x, y: cell.y - 1 },
       { x: cell.x, y: cell.y + 1 },
       { x: cell.x - 1, y: cell.y },
@@ -346,8 +374,8 @@ export default class Play extends Phaser.Scene {
       { x: cell.x + 1, y: cell.y - 1 },
       { x: cell.x + 1, y: cell.y + 1 },
     ];
-    for (let c of nearbyCells) {
-      let crop = this.cropMap.get(JSON.stringify(c));
+    for (const c of nearbyCells) {
+      const crop = this.cropMap.get(JSON.stringify(c));
       if (crop != null) {
         adjacentCrops.push(crop.getPlantName());
       }
@@ -365,8 +393,8 @@ export default class Play extends Phaser.Scene {
   }
 
   setWaterLevelPerCell(rained: boolean) {
-    for (let col of this.gridCells!) {
-      for (let cell of col) {
+    for (const col of this.gridCells!) {
+      for (const cell of col) {
         if (rained) {
           cell.waterLevel = randomInt(3, 5);
         } else if (cell.waterLevel > 1) {
@@ -378,14 +406,14 @@ export default class Play extends Phaser.Scene {
 
   displayCurrentCellStatus() {
     this.statusText!.text = "Current Cell: ";
-    let currCell = this.player!.currCell;
+    const currCell = this.player!.currCell;
     this.statusText!.text += currCell!.x + ", " + currCell!.y + "\n";
     this.statusText!.text += "Sun Level = " + this.currentSunLevel + "\n";
     this.statusText!.text +=
       "Cell Water Level = " +
       this.gridCells![currCell!.x][currCell!.y].waterLevel +
       "\n";
-    let currCrop = this.cropMap.get(JSON.stringify(currCell));
+    const currCrop = this.cropMap.get(JSON.stringify(currCell));
     if (currCrop != null) {
       this.statusText!.text +=
         "Crop = " +

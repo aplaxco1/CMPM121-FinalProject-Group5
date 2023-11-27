@@ -1,4 +1,4 @@
-export interface cropOption {
+export interface CropOption {
   cropName: string;
   growthRate: number;
   sunLevel: number;
@@ -7,11 +7,11 @@ export interface cropOption {
 }
 
 export class Crop extends Phaser.GameObjects.Sprite {
-  cropData?: cropOption;
+  cropData?: CropOption;
   cropSprite: Phaser.GameObjects.Sprite;
   growthLevel: number = 1;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, crop: cropOption) {
+  constructor(scene: Phaser.Scene, x: number, y: number, crop: CropOption) {
     const texture = "crop_atlas";
     const frame = crop.cropName + "1";
 
@@ -55,8 +55,8 @@ export class Crop extends Phaser.GameObjects.Sprite {
 
   checkNutrients(sun: number, water: number, adjacentCrops: string[]): boolean {
     let badCropsNearby: boolean = false;
-    for (let crop of this.cropData!.cropsToAvoid) {
-      for (let nearbyCrop of adjacentCrops) {
+    for (const crop of this.cropData!.cropsToAvoid) {
+      for (const nearbyCrop of adjacentCrops) {
         if (crop == nearbyCrop) {
           badCropsNearby = true;
         }

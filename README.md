@@ -105,13 +105,13 @@ of game development in a team environment.
   crops within the bounds of each grid cell. Though not required, we also have some directional walking and idle animations set up for the player, to give a bit more life to the scene rather then having a
   completely static controllable character. The controllable sprite we have now is only temporary, and we have the final spritesheet animations already set up, but we will implement this more polished version
   later on.
-  
+
 - [F0.b] You advance time in the turn-based simulation manually:
 
   Within our game, we have a "sleeping" mechanic, which allows the player to progress time forwards to the next day. In order to do this, the player can press the "S" key to progress to the next turn, which is
   when the new eather conditions for the next day are randomized, and how plants are enabled to grow over time. Rather than having a contsant update() loop to progress the game and change its state (aside from
   where the player chooses to plant crops), this mechanic serves to advance time within the game forwards in a sort of turn-based simulation whenever the player chooses to do so.
-  
+
 - [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them:
 
   As the player moves through the gird, the cell that they are currently standing within the bounds of is calculated and updated to reflect their current position. Based on what grid cell the player is standing
@@ -120,7 +120,7 @@ of game development in a team environment.
   they are standing on. In order to store the information of which crop is placed in which grid cell, we are utilizing a map, which uses the numbered (row, collumn) grid cell as a key, and maps it to the newly
   created crop. When a player gathers a crop, its sprite will be removed from the scene and the grid cell will be set to null within the map. The crop will only count as "collected" and added to their inventory
   of crops if it was fully grown when the player harvested it.
-  
+
 - [F0.d] Grid cells have sun and water levels. The incoming sun and water for each cell is somehow randomly generated each turn. Sun energy cannot be stored in a cell (it is used immediately or lost)
   while water moisture can be slowly accumulated over several turns:
 
@@ -129,7 +129,7 @@ of game development in a team environment.
   progresses to the next turn, there is a random chance of rain, which will set the water level to its highest for that day. As time progresses without rain, this water level will slowly decrease back down to
   its lowest value unless it rains again during that period of time. in tjis sense, the sun level is randomly selected each day, while the water level is randomly increased if a certain random event occurs and
   decrements over time as the rain water dries up.
-  
+
 - [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”):
 
   Within our game, we have a generic crop class which describes the crops growth, and contains functions to allow it to grow each time that the player sleeps. Based on which of the crops that the player decides
@@ -137,7 +137,7 @@ of game development in a team environment.
   to the newly created crop, which will influence the sprites that it uses to represent itself on the grid, and also determines whether or not the crop will be able to grow based on the weather conditions of the
   current turn. When these crop type specific conditions are met, its growth level will increase from level 1 to level 6, and the crop type specific sprite used to represent that crop will change to reflect
   this growth level.
-  
+
 - [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions):
 
   As we have it set up now, each turn, all of the crops currently on the grid will attempt to grow and increase their growth level. However, these crops will only grow if the generated sun level and water level
@@ -145,7 +145,7 @@ of game development in a team environment.
   though that best fit the theme of our game. If these conditions are not satisfied, then the plant will not be able to progress its growth, and its current sprite representation and growth level will remain
   stagnant, until the next turn that both of these conditions are correctly met. Of course, these requirements are different per crop type, so this means that some crops will likely end up growing fatser than
   others and will grow at different rates, depending upon their minimum necessary sun and water levels.
-  
+
 - [F0.g] A play scenario is completed when some condition is satisfied (e.g. at least X plants at growth level Y or above):
 
   Thus far in development, we have a temporary condition that needs to be satisfied in order for the player to complete the gameplay scenario, that being, to harvest five fully grown strawberries. When a player
@@ -158,7 +158,7 @@ of game development in a team environment.
 
 Over the course of implementing each of the F0 requirements while we have decided to stick with utilizng the Phaser framework and the TypeScript language in the creation of this gardening game, we did encounter
 a few issues regarding the ways in which we had initially set uo the project, and our expectations regarding the transition from using JavaScript to TypeScript in a Phaser project. As dependencies when using
-TypeScript as compared to JavaScript work a bit differently, we did face a few complications with our initial expectations regarding how global variables fundtion. In past Phaser projects, when using 
+TypeScript as compared to JavaScript work a bit differently, we did face a few complications with our initial expectations regarding how global variables fundtion. In past Phaser projects, when using
 JavaScript, we would simply define global variables in the main.js file, and those could be changed and accessed by any scene within the game, but global variables work much differently in TypeScript. Which impacted how we approached defining and altering variables used by different Phaser scenes and prefabs. In addition to this, we did also have to become more accustumed to the ways in which Phaser objects need
 to be defined in TypeScript, as the specific types or variables need to be more specifically defined and maintained than they do in JavaScript. However, after becoming accustomed to these differences throughout
 the course of fuffilling the F0 requirements, we found this engine still suitable to continue working with.
