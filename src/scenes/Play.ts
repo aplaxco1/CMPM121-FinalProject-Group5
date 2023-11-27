@@ -4,7 +4,7 @@ import { Crop, cropOption } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
-const uIBarHeight: number = 120;
+const uIBarHeight: number = 180;
 
 interface cellData {
   x: number;
@@ -18,28 +18,23 @@ const cropOptions: cropOption[] = [
     growthRate: 5,
     sunLevel: 2,
     waterLevel: 3,
-    spaceNeeded: 0,
-    cropToAvoid: "Potato",
+    cropsToAvoid: ["Potato"],
   },
   {
     cropName: "Potato",
     growthRate: 4,
     sunLevel: 3,
     waterLevel: 4,
-    spaceNeeded: 1,
-    cropToAvoid: "",
+    cropsToAvoid: ["Corn"],
   },
   {
     cropName: "Corn",
     growthRate: 6,
     sunLevel: 4,
     waterLevel: 2,
-    spaceNeeded: 1,
-    cropToAvoid: "Strawberry",
+    cropsToAvoid: ["Strawberry", "Potato"],
   },
 ];
-
-console.log(cropOptions);
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
@@ -167,10 +162,6 @@ export default class Play extends Phaser.Scene {
       // simple player movement
       this.movePlayer();
 
-      // plant a crop
-      // if (this.place!.isDown) {
-      //   this.plant(stawberry);
-      // }
       if (this.placeCrop1!.isDown) {
         this.plant(cropOptions[0]);
       }
@@ -323,9 +314,33 @@ export default class Play extends Phaser.Scene {
         console.log(
           "Cell " + [cell.x, cell.y] + " Water Level = " + cellWaterLevel,
         );
-        newCrop.grow(cellWaterLevel, this.currentSunLevel!);
+        // get list of crops near this one
+        let adjacentCrops = this.getAdjacentCrops(cell);
+        console.log(adjacentCrops);
+        newCrop.grow(cellWaterLevel, this.currentSunLevel!, adjacentCrops);
       }
     });
+  }
+
+  getAdjacentCrops(cell: cellData): string[] {
+    let adjacentCrops: string[] = [];
+    let nearbyCells = [
+      { x: cell.x, y: cell.y - 1 },
+      { x: cell.x, y: cell.y + 1 },
+      { x: cell.x - 1, y: cell.y },
+      { x: cell.x + 1, y: cell.y },
+      { x: cell.x - 1, y: cell.y - 1 },
+      { x: cell.x - 1, y: cell.y + 1 },
+      { x: cell.x + 1, y: cell.y - 1 },
+      { x: cell.x + 1, y: cell.y + 1 },
+    ];
+    for (let c of nearbyCells) {
+      let crop = this.cropMap.get(JSON.stringify(c));
+      if (crop != null) {
+        adjacentCrops.push(crop.getPlantName());
+      }
+    }
+    return adjacentCrops;
   }
 
   randomizeConditions() {
