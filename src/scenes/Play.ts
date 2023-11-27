@@ -70,10 +70,11 @@ export default class Play extends Phaser.Scene {
   // UI text
   textConfig = {
     align: "center",
-    fontSize: "28px",
+    fontSize: "22px",
   };
   winText?: Phaser.GameObjects.Text;
   controlsText?: Phaser.GameObjects.Text;
+  statusText?: Phaser.GameObjects.Text;
 
   constructor() {
     super("play");
@@ -136,7 +137,16 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\nCurrent Objective: Harvet 5 Starberries",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.statusText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 2,
+        "Current Cell:\n",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -161,6 +171,8 @@ export default class Play extends Phaser.Scene {
     ) {
       // simple player movement
       this.movePlayer();
+
+      this.displayCurrentCellStatus();
 
       if (this.placeCrop1!.isDown) {
         this.plant(cropOptions[0]);
@@ -270,8 +282,8 @@ export default class Play extends Phaser.Scene {
     this.cameras.main.fadeIn(1000);
   }
   playerWake() {
-    this.randomizeConditions();
     this.growPlants();
+    this.randomizeConditions();
     console.log("Sun Level = " + this.currentSunLevel);
     this.sleeping = false;
   }
@@ -361,6 +373,39 @@ export default class Play extends Phaser.Scene {
           cell.waterLevel -= 1;
         }
       }
+    }
+  }
+
+  displayCurrentCellStatus() {
+    this.statusText!.text = "Current Cell: ";
+    let currCell = this.player!.currCell;
+    this.statusText!.text += currCell!.x + ", " + currCell!.y + "\n";
+    this.statusText!.text += "Sun Level = " + this.currentSunLevel + "\n";
+    this.statusText!.text +=
+      "Cell Water Level = " +
+      this.gridCells![currCell!.x][currCell!.y].waterLevel +
+      "\n";
+    let currCrop = this.cropMap.get(JSON.stringify(currCell));
+    if (currCrop != null) {
+      this.statusText!.text +=
+        "Crop = " +
+        currCrop.getPlantName() +
+        ", Crop Level = " +
+        currCrop.getGrowthLevel() +
+        "\n";
+      if (
+        currCrop.checkNutrients(
+          this.currentSunLevel!,
+          this.gridCells![currCell!.x][currCell!.y].waterLevel,
+          this.getAdjacentCrops(this.gridCells![currCell!.x][currCell!.y]),
+        )
+      ) {
+        this.statusText!.text += "Crop Can Grow!\n";
+      } else {
+        this.statusText!.text += "Crop Cannot Grow!\n";
+      }
+    } else {
+      this.statusText!.text += "No Crop In Cell\n";
     }
   }
 }
