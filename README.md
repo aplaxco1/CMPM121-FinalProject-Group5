@@ -181,13 +181,43 @@ even further develop the art and visuals of our game.
 ## How We Satisfied Software Requirements [F0 - F1]
 
 - [F0.a] You control a character moving on a 2D grid.
+
+  Same as last week. Player controls character with continuous four directional movement on a 2D grid.
+  
 - [F0.b] You advance time in the turn-based simulation manually.
+
+  Same as last week. Player "sleeps" to progress time forwards.
+  
 - [F0.c] You can reap (gather) or sow (plant) plants on the grid when your character is near them.
+
+  Same as last week. Depending on the player's current grid location, they can plant a crop within that cell (if no other crop is there), and can harvest a crop within that cell (if a crop exists there).
+  
 - [F0.d] Grid cells have sun and water levels. The incoming sun and water for each cell is somehow randomly generated each turn. Sun energy cannot be stored in a cell (it is used immediately or lost) while
   water moisture can be slowly accumulated over several turns.
+
+  Since last week, this functionaility has been altered a bit. Before, the both the sun level and the water level was global across all grid cells, but now, the water level is different per grid cell on the map.
+  Now, every time the player sleeps, there is a chance of rain to occur, and, if it rains, the specific water level of each individual cell is increaed to a random high water level, and then they all indiviually
+  decrease back down to the lowest water every turn that it does not rain. This means that rather than the sun levels and water levels both being global, the sun level if global, while the water level is
+  individual per each cell.
+  
 - [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”).
+
+  Same as last week. There are three different types of crops that the player is able to plant in each grid cell, all which grow every turn to increase their level if their crop specific conditions are met.
+  The only addition we made in this regard to to add the individual cell information, including its water level, the current crop in that cell, and the growth level of the crop in that cell is updated and
+  displayed at the bottom of the screen so that the player is actually able to view its information.
+  
 - [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions).
+
+  Since last week, we have added some additional spatial conditionals to each plant. Before, the only aspects which determined wether a crop could grow each turn were the global sun level, and (now) the water
+  level of teh specific cell that the crop resides within. Now however, we have added an aditional spatial condition, which limits which types of crops can be placed next to one another. Now, each crop type has
+  a list of specific crops that they cannot grow when they are placed next to (are within 1 cell of disnace from the crop's current cell location), and the crop checks which types of crops exist within the cells
+  next to them before they are able to grow. This list of crops that each crop cannot grow next to is specific to each type of crop, so, for example, strawberries cannot grow if there is a potato crop in one
+  of the cells next to them.
+  
 - [F0.g] A play scenario is completed when some condition is satisfied (e.g. at least X plants at growth level Y or above).
+
+  Same as last week. We have a temporary condition to finish the play scenario, that being to grow 5 strawberries.
+  
 - [F1.a] The important state of each cell of your game’s grid must be backed by a single contiguous byte array in AoS or SoA format. Your team must statically allocate memory usage for the whole grid.
 - [F1.b] The player must be able to undo every major choice (all the way back to the start of play), even from a saved game. They should be able to redo (undo of undo operations) multiple times.
 - [F1.c] The player must be able to manually save their progress in the game in a way that allows them to load that save and continue play another day. The player must be able to manage multiple save files (allowing save scumming).
