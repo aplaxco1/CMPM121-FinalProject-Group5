@@ -203,8 +203,8 @@ even further develop the art and visuals of our game.
 - [F0.e] Each plant on the grid has a type (e.g. one of 3 species) and a growth level (e.g. “level 1”, “level 2”, “level 3”).
 
   Same as last week. There are three different types of crops that the player is able to plant in each grid cell, all which grow every turn to increase their level if their crop specific conditions are met.
-  The only addition we made in this regard to to add the individual cell information, including its water level, the current crop in that cell, and the growth level of the crop in that cell is updated and
-  displayed at the bottom of the screen so that the player is actually able to view its information.
+  The only addition we made in this regard is to display and update the individual cell information, including its water level, the current crop in that cell, and the growth level of the crop in that cell, at
+  the bottom of the screen so that the player is actually able to view its information as they move across the grid.
   
 - [F0.f] Simple spatial rules govern plant growth based on sun, water, and nearby plants (growth is unlocked by satisfying conditions).
 
@@ -219,8 +219,36 @@ even further develop the art and visuals of our game.
   Same as last week. We have a temporary condition to finish the play scenario, that being to grow 5 strawberries.
   
 - [F1.a] The important state of each cell of your game’s grid must be backed by a single contiguous byte array in AoS or SoA format. Your team must statically allocate memory usage for the whole grid.
+
+  This particular feature was included within our game since last week, though it has been slightly altered to account for the change in water levels. Now, each cell stores an x position, y position, and also
+  a water level which is updated each turn. The way that our game stores the information for each grid cell is in the AoS (array of structures) format, where there exists an array of arrays that contain these
+  structures for storing the row, collumn specifc cell's information. We decided to stick with this array of array of structures format, so that the array could be easily indexed into based on the row and column
+  information of each cell and the crop that exists within that specific cell in the Map of crops on the grid. At the start of play, this AoS is initialized and statically allocated to account for all of the
+  row collumn cells in the game with randomized starting water levels. A diagram of the structure for this particular implementation of AoS can be seen below:
+
+  ADD DIAGRAM IMAGE HERE
+  
 - [F1.b] The player must be able to undo every major choice (all the way back to the start of play), even from a saved game. They should be able to redo (undo of undo operations) multiple times.
+
+  IN PROGRESS
+  
 - [F1.c] The player must be able to manually save their progress in the game in a way that allows them to load that save and continue play another day. The player must be able to manage multiple save files (allowing save scumming).
+
+  The player has access to 3 different save files which they can save the current state of their game into, so that when they return to the menu scene, or exit the game and come back to play at another time,
+  they can load one of these save files to pick up where they left off. When the game is saved, a data entry is created to store into local storage, which contains the current state of all the grid cells (x
+  position, y position, and waterLevel), the current sun level, the player's current position, the current stack of undo and redo commands, as well as the map of plants, which are converted into a
+  structure containing its x position, y position, crop specific data, and current growth level. Depending on which of the three save files that the player chooses to save their current game into, the data
+  will be saved to a specific entry ("savefile01", "savefile02", or "savefile03"). In the main menu, if the player has previously saved their game to one of the three files, it will appear as an option to
+  load the game from one of those files, and the play scene will start with the name of the file being loaded from passed into the scene. Depending on how the play scene was started, if it was a new save, it
+  will initailzie its state to its default values, but if it was loaded from one of the save files, it will set up the state of the game from the data stored in local storage, so that the game accurately
+  reflects its state from when the player last saved.
+  
 - [F1.d] The game must implement an implicit auto-save system to support recovery from unexpected quits. (For example, when the game is launched, if an auto-save entry is present, the game might ask the player "do you want to continue where you left off?" The auto-save entry might or might not be visible among the list of manual save entries available for the player to load as part of F1.c.)
+
+  Using the save system set up for the previous programming requirement, every time that the player sleeps and progresses their turn, the game creates a new autosave which the player can load to continue from
+  where they left off from the main menu of the game. This save functionaility works the same as saving to a specific save slot, but instead saves it to local storage as an "autosave" entry. If an autosave has
+  been created, then in the main menu, the player will have the option to load the game from the last autosave, so that when they enter the play scene, it will set up the game state depending on the data
+  gathered from the "autosave" entry in local storage. Because this save is not manual, every time that the player sleeps, regardless of wether its from a newly started game or loaded from a save file, the game
+  will save this new game state over the previous autosave.
 
 ## Reflection
