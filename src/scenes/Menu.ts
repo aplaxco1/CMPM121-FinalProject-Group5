@@ -19,36 +19,42 @@ export default class Menu extends Phaser.Scene {
   }
 
   create() {
+    //localStorage.clear();
+
     const menuConfig = {
       align: "center",
-      fontSize: "28px",
+      fontSize: "26px",
+      wordWrap: { width: 700 },
     };
 
     this.title = this.add
       .text(
         (this.game.config.width as number) / 2,
         (this.game.config.height as number) / 2,
-        "CMPM 121 - Final Project\nGardening Game\n\n[SPACE] Start New Game\n\n",
+        "CMPM 121 - Final Project\nGardening Game\n\n[SPACE] Start New Game\n",
         menuConfig,
       )
       .setOrigin(0.5);
+    if (localStorage.getItem("autosave")) {
+      this.title.text += "[C] Continue From Last AutoSave\n\n";
+    }
     if (localStorage.getItem("savefile01")) {
-      this.title.text += "[1] Save File 01\n";
+      let data = JSON.parse(localStorage.getItem("savefile01")!);
+      this.title.text += "[1] Save File 01 - [" + data.time + "]\n";
     } else {
       this.title.text += "[1] Save File 01 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile02")) {
-      this.title.text += "[2] Save File 02\n";
+      let data = JSON.parse(localStorage.getItem("savefile02")!);
+      this.title.text += "[2] Save File 02 - [" + data.time + "]\n";
     } else {
       this.title.text += "[2] Save File 02 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile03")) {
-      this.title.text += "[3] Save File 03\n";
+      let data = JSON.parse(localStorage.getItem("savefile03")!);
+      this.title.text += "[3] Save File 03 - [" + data.time + "]\n";
     } else {
       this.title.text += "[3] Save File 03 - [EMPTY]\n";
-    }
-    if (localStorage.getItem("autosave")) {
-      this.title.text += "[C] Continue From Last Save\n";
     }
     this.start = this.#addKey("SPACE");
     this.loadAutoSave = this.#addKey("C");
@@ -84,7 +90,7 @@ export default class Menu extends Phaser.Scene {
       this.scene.start("play", { savefile: "savefile02" });
     }
     if (
-      Phaser.Input.Keyboard.JustDown(this.loadSaveFile01!) &&
+      Phaser.Input.Keyboard.JustDown(this.loadSaveFile03!) &&
       localStorage.getItem("savefile03")
     ) {
       this.scene.stop();

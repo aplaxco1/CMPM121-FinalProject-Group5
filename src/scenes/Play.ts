@@ -37,20 +37,14 @@ const cropOptions: CropOption[] = [
   },
 ];
 
-// for save data:
-// - store grid cellsData (mostly for water level) (done)
-// - store cropMap (for existing crops and their current locations/levels to add to scene on start)
-// - store collected crops (done)
-// - store current sun level (done)
-// - lastknown player x and y position
-// - also save command manager (for redo and undo stacks)
-
 interface saveData {
+  time: string;
   gridData: string;
   sunLevel: string;
   cropInventory: string;
   playerPos: string;
   cropMap: string;
+  // save undo/redo stuff
 }
 
 export default class Play extends Phaser.Scene {
@@ -86,6 +80,12 @@ export default class Play extends Phaser.Scene {
   restart?: Phaser.Input.Keyboard.Key;
   undo?: Phaser.Input.Keyboard.Key;
   redo?: Phaser.Input.Keyboard.Key;
+  // save
+  save1?: Phaser.Input.Keyboard.Key;
+  save2?: Phaser.Input.Keyboard.Key;
+  save3?: Phaser.Input.Keyboard.Key;
+  // return to menu
+  return?: Phaser.Input.Keyboard.Key;
 
   // UI text
   textConfig = {
@@ -119,7 +119,6 @@ export default class Play extends Phaser.Scene {
   }
 
   saveGame(savefile: string) {
-    // save crop name, position, and level to create new crops on load
     let cropDataMap = new Map();
     this.cropMap.forEach((value: Crop | null, key: string) => {
       if (value != null) {
@@ -132,7 +131,9 @@ export default class Play extends Phaser.Scene {
         cropDataMap.set(key, cropInfo);
       }
     });
+    let date: Date = new Date();
     let data: saveData = {
+      time: date.toString(),
       gridData: JSON.stringify(this.gridCells),
       sunLevel: this.currentSunLevel!.toString(),
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
@@ -170,17 +171,21 @@ export default class Play extends Phaser.Scene {
     this.left = this.#addKey("LEFT");
     this.up = this.#addKey("UP");
     this.down = this.#addKey("DOWN");
-    //this.place = this.#addKey("SPACE");
+    this.movementInputs = [this.right, this.left, this.up, this.down];
     this.placeCrop1 = this.#addKey("ONE");
     this.placeCrop2 = this.#addKey("TWO");
     this.placeCrop3 = this.#addKey("THREE");
     this.collect = this.#addKey("H");
     this.restart = this.#addKey("SPACE");
     this.sleep = this.#addKey("S");
-    this.movementInputs = [this.right, this.left, this.up, this.down];
     // command keys
     this.undo = this.#addKey("Z");
     this.redo = this.#addKey("X");
+    // save keys
+    this.save1 = this.#addKey("F1");
+    this.save2 = this.#addKey("F2");
+    this.save3 = this.#addKey("F3");
+    this.return = this.#addKey("ESC");
 
     // set world bounds so player cannot move outside of them
     this.physics.world.setBounds(
@@ -224,7 +229,7 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[R] - Redo\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[R] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -283,6 +288,26 @@ export default class Play extends Phaser.Scene {
         this.cameras.main.fadeOut(1000);
         this.time.delayedCall(1000, this.fadeIn, [], this);
         this.time.delayedCall(2000, this.playerWake, [], this);
+      }
+
+      // save game
+      if (Phaser.Input.Keyboard.JustDown(this.save1!)) {
+        this.saveGame("savefile01");
+        alert("Save Complete");
+      }
+      if (Phaser.Input.Keyboard.JustDown(this.save2!)) {
+        this.saveGame("savefile02");
+        alert("Save Complete");
+      }
+      if (Phaser.Input.Keyboard.JustDown(this.save3!)) {
+        this.saveGame("savefile03");
+        alert("Save Complete");
+      }
+
+      // return to menu
+      if (Phaser.Input.Keyboard.JustDown(this.return!)) {
+        this.scene.stop();
+        this.scene.start("menu");
       }
 
       if (this.undo!.isDown) {
