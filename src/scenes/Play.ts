@@ -50,6 +50,7 @@ interface saveData {
   sunLevel: string;
   cropInventory: string;
   playerPos: string;
+  cropMap: string;
 }
 
 export default class Play extends Phaser.Scene {
@@ -118,11 +119,25 @@ export default class Play extends Phaser.Scene {
   }
 
   saveGame(savefile: string) {
+    // save crop name, position, and level to create new crops on load
+    let cropDataMap = new Map();
+    this.cropMap.forEach((value: Crop | null, key: string) => {
+      if (value != null) {
+        let cropInfo = {
+          x: value.x,
+          y: value.y,
+          cropOption: value.cropData,
+          cropLevel: value.getGrowthLevel(),
+        };
+        cropDataMap.set(key, cropInfo);
+      }
+    });
     let data: saveData = {
       gridData: JSON.stringify(this.gridCells),
       sunLevel: this.currentSunLevel!.toString(),
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
       playerPos: JSON.stringify({ x: this.player!.x, y: this.player!.y }),
+      cropMap: JSON.stringify(Array.from(cropDataMap.entries())),
     };
     localStorage.setItem(savefile, JSON.stringify(data));
   }
@@ -133,6 +148,20 @@ export default class Play extends Phaser.Scene {
     this.currentSunLevel = parseInt(data.sunLevel);
     this.collectedCrops = new Map(JSON.parse(data.cropInventory));
     this.playerStartingPosition = JSON.parse(data.playerPos);
+    this.drawGrid();
+    let cropDataMap = new Map(JSON.parse(data.cropMap));
+    cropDataMap.forEach((value: any, key: any) => {
+      const newPlant = new Crop(
+        this,
+        value.x,
+        value.y,
+        value.cropOption,
+        value.cropLevel,
+      )
+        .setOrigin(0, 0)
+        .setScale(2);
+      this.cropMap.set(key, newPlant);
+    });
   }
 
   create() {
@@ -171,15 +200,13 @@ export default class Play extends Phaser.Scene {
       }
       // set player starting position
       this.playerStartingPosition = { x: 30, y: 30 };
+      this.drawGrid();
     } else if (this.loadingFrom! == "autosave") {
       this.loadGame(this.loadingFrom);
     } else {
       // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
       this.loadGame(this.loadingFrom!);
     }
-
-    // draw grid
-    this.drawGrid();
 
     // draw UI bar
     this.add
