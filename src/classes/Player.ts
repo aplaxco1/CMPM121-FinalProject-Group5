@@ -19,8 +19,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.anims.play("idle_down");
-    this.body!.setSize(cellWidth / 3, cellHeight / 3);
-    this.setScale(3);
+    this.body!.setSize(cellWidth / 1.5, cellHeight / 1.5);
+    this.setScale(1.5);
     this.cellWidth = cellWidth;
     this.cellHeight = cellHeight;
   }
