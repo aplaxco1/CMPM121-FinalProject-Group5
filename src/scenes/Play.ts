@@ -38,15 +38,18 @@ const cropOptions: CropOption[] = [
 ];
 
 // for save data:
-// - store grid cellsData (mostly for water level)
+// - store grid cellsData (mostly for water level) (done)
 // - store cropMap (for existing crops and their current locations/levels to add to scene on start)
-// - store collected crops
-// - store current sun level
+// - store collected crops (done)
+// - store current sun level (done)
 // - lastknown player x and y position
 // - also save command manager (for redo and undo stacks)
 
 interface saveData {
   gridData: string;
+  sunLevel: string;
+  cropInventory: string;
+  playerPos: string;
 }
 
 export default class Play extends Phaser.Scene {
@@ -117,6 +120,9 @@ export default class Play extends Phaser.Scene {
   saveGame(savefile: string) {
     let data: saveData = {
       gridData: JSON.stringify(this.gridCells),
+      sunLevel: this.currentSunLevel!.toString(),
+      cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
+      playerPos: JSON.stringify({ x: this.player!.x, y: this.player!.y }),
     };
     localStorage.setItem(savefile, JSON.stringify(data));
   }
@@ -124,6 +130,9 @@ export default class Play extends Phaser.Scene {
   loadGame(savefile: string) {
     let data: saveData = JSON.parse(localStorage.getItem(savefile)!);
     this.gridCells = JSON.parse(data.gridData);
+    this.currentSunLevel = parseInt(data.sunLevel);
+    this.collectedCrops = new Map(JSON.parse(data.cropInventory));
+    this.playerStartingPosition = JSON.parse(data.playerPos);
   }
 
   create() {
@@ -156,7 +165,6 @@ export default class Play extends Phaser.Scene {
       // randomize global sun and water level
       this.randomizeConditions();
       this.initializeGrid();
-      console.log("Sun Level = " + this.currentSunLevel);
       // initialize collected crops to zero
       for (const crop of cropOptions) {
         this.collectedCrops.set(crop.cropName, 0);
@@ -165,17 +173,9 @@ export default class Play extends Phaser.Scene {
       this.playerStartingPosition = { x: 30, y: 30 };
     } else if (this.loadingFrom! == "autosave") {
       this.loadGame(this.loadingFrom);
-      // randomize global sun and water level
-      this.randomizeConditions();
-      console.log("Sun Level = " + this.currentSunLevel);
-      // initialize collected crops to zero
-      for (const crop of cropOptions) {
-        this.collectedCrops.set(crop.cropName, 0);
-      }
-      // set player starting position
-      this.playerStartingPosition = { x: 30, y: 30 };
     } else {
       // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
+      this.loadGame(this.loadingFrom!);
     }
 
     // draw grid
@@ -332,7 +332,7 @@ export default class Play extends Phaser.Scene {
       !this.cropMap.get(JSON.stringify(key)) ||
       this.cropMap.get(JSON.stringify(key)) == null
     ) {
-      const newPlant = new Crop(this, pos.x, pos.y, crop)
+      const newPlant = new Crop(this, pos.x, pos.y, crop, 1)
         .setOrigin(0, 0)
         .setScale(2);
       this.cropMap.set(JSON.stringify(key), newPlant);
@@ -363,7 +363,6 @@ export default class Play extends Phaser.Scene {
   playerWake() {
     this.growPlants();
     this.randomizeConditions();
-    console.log("Sun Level = " + this.currentSunLevel);
     this.sleeping = false;
     // autosave after every turn
     this.saveGame("autosave");
@@ -411,9 +410,6 @@ export default class Play extends Phaser.Scene {
         // get water level of cell
         const cell = JSON.parse(key);
         const cellWaterLevel = this.gridCells![cell.x][cell.y].waterLevel;
-        console.log(
-          "Cell " + [cell.x, cell.y] + " Water Level = " + cellWaterLevel,
-        );
         // get list of crops near this one
         const adjacentCrops = this.getAdjacentCrops(cell);
         console.log(adjacentCrops);

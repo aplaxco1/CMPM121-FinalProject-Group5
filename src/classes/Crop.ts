@@ -11,11 +11,18 @@ export class Crop extends Phaser.GameObjects.Sprite {
   cropSprite: Phaser.GameObjects.Sprite;
   growthLevel: number = 1;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, crop: CropOption) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    crop: CropOption,
+    level: number,
+  ) {
     const texture = "crop_atlas";
-    const frame = crop.cropName + "1";
+    const frame = crop.cropName + level;
 
     super(scene, x, y, texture, frame);
+    this.growthLevel = level;
     this.cropSprite = scene.add.existing(this);
     scene.physics.add.existing(this);
     //scene.physics.add.existing(this.cropSprite);
