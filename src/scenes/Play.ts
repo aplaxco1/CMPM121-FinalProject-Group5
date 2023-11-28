@@ -45,6 +45,10 @@ const cropOptions: CropOption[] = [
 // - lastknown player x and y position
 // - also save command manager (for redo and undo stacks)
 
+interface saveData {
+  gridData: string;
+}
+
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
   gridCells?: CellData[][] = [];
@@ -110,6 +114,18 @@ export default class Play extends Phaser.Scene {
     return this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes[name]);
   }
 
+  saveGame(savefile: string) {
+    let data: saveData = {
+      gridData: JSON.stringify(this.gridCells),
+    };
+    localStorage.setItem(savefile, JSON.stringify(data));
+  }
+
+  loadGame(savefile: string) {
+    let data: saveData = JSON.parse(localStorage.getItem(savefile)!);
+    this.gridCells = JSON.parse(data.gridData);
+  }
+
   create() {
     // add keyboard keys
     this.right = this.#addKey("RIGHT");
@@ -139,6 +155,7 @@ export default class Play extends Phaser.Scene {
     if (this.loadingFrom! == "newgame") {
       // randomize global sun and water level
       this.randomizeConditions();
+      this.initializeGrid();
       console.log("Sun Level = " + this.currentSunLevel);
       // initialize collected crops to zero
       for (const crop of cropOptions) {
@@ -147,7 +164,16 @@ export default class Play extends Phaser.Scene {
       // set player starting position
       this.playerStartingPosition = { x: 30, y: 30 };
     } else if (this.loadingFrom! == "autosave") {
-      // LOAD FROM AUTOSAVE
+      this.loadGame(this.loadingFrom);
+      // randomize global sun and water level
+      this.randomizeConditions();
+      console.log("Sun Level = " + this.currentSunLevel);
+      // initialize collected crops to zero
+      for (const crop of cropOptions) {
+        this.collectedCrops.set(crop.cropName, 0);
+      }
+      // set player starting position
+      this.playerStartingPosition = { x: 30, y: 30 };
     } else {
       // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
     }
@@ -220,7 +246,7 @@ export default class Play extends Phaser.Scene {
 
       // collect a crop
       if (this.collect!.isDown) {
-        this.collectPlant();
+        this.harvest();
       }
 
       // progress turn
@@ -313,7 +339,7 @@ export default class Play extends Phaser.Scene {
     }
   }
 
-  collectPlant() {
+  harvest() {
     const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
     const currCrop = this.cropMap.get(JSON.stringify(key));
     if (currCrop != null) {
@@ -339,9 +365,11 @@ export default class Play extends Phaser.Scene {
     this.randomizeConditions();
     console.log("Sun Level = " + this.currentSunLevel);
     this.sleeping = false;
+    // autosave after every turn
+    this.saveGame("autosave");
   }
 
-  drawGrid() {
+  initializeGrid() {
     for (
       let x = 0;
       x < (this.game.config.width as number) / gridCellWidth;
@@ -361,12 +389,19 @@ export default class Play extends Phaser.Scene {
           y: currY,
           waterLevel: randomInt(1, 5),
         });
+      }
+      this.gridCells?.push(currCol);
+    }
+  }
+
+  drawGrid() {
+    for (let col of this.gridCells!) {
+      for (let cell of col) {
         const cellRect = this.add
-          .rectangle(currX, currY, gridCellWidth, gridCellHeight, 0x34ba58)
+          .rectangle(cell.x, cell.y, gridCellWidth, gridCellHeight, 0x34ba58)
           .setOrigin(0, 0);
         cellRect.isStroked = true;
       }
-      this.gridCells?.push(currCol);
     }
   }
 
