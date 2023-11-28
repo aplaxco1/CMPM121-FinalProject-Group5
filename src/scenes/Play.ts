@@ -37,7 +37,7 @@ const cropOptions: CropOption[] = [
   },
 ];
 
-interface saveData {
+interface SaveData {
   time: string;
   gridData: string;
   sunLevel: string;
@@ -119,10 +119,10 @@ export default class Play extends Phaser.Scene {
   }
 
   saveGame(savefile: string) {
-    let cropDataMap = new Map();
+    const cropDataMap = new Map();
     this.cropMap.forEach((value: Crop | null, key: string) => {
       if (value != null) {
-        let cropInfo = {
+        const cropInfo = {
           x: value.x,
           y: value.y,
           cropOption: value.cropData,
@@ -131,8 +131,8 @@ export default class Play extends Phaser.Scene {
         cropDataMap.set(key, cropInfo);
       }
     });
-    let date: Date = new Date();
-    let data: saveData = {
+    const date: Date = new Date();
+    const data: SaveData = {
       time: date.toString(),
       gridData: JSON.stringify(this.gridCells),
       sunLevel: this.currentSunLevel!.toString(),
@@ -144,13 +144,13 @@ export default class Play extends Phaser.Scene {
   }
 
   loadGame(savefile: string) {
-    let data: saveData = JSON.parse(localStorage.getItem(savefile)!);
+    const data: SaveData = JSON.parse(localStorage.getItem(savefile)!);
     this.gridCells = JSON.parse(data.gridData);
     this.currentSunLevel = parseInt(data.sunLevel);
     this.collectedCrops = new Map(JSON.parse(data.cropInventory));
     this.playerStartingPosition = JSON.parse(data.playerPos);
     this.drawGrid();
-    let cropDataMap = new Map(JSON.parse(data.cropMap));
+    const cropDataMap = new Map(JSON.parse(data.cropMap));
     cropDataMap.forEach((value: any, key: any) => {
       const newPlant = new Crop(
         this,
@@ -446,8 +446,8 @@ export default class Play extends Phaser.Scene {
   }
 
   drawGrid() {
-    for (let col of this.gridCells!) {
-      for (let cell of col) {
+    for (const col of this.gridCells!) {
+      for (const cell of col) {
         const cellRect = this.add
           .rectangle(cell.x, cell.y, gridCellWidth, gridCellHeight, 0x34ba58)
           .setOrigin(0, 0);
