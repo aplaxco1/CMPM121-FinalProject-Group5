@@ -37,12 +37,21 @@ const cropOptions: CropOption[] = [
   },
 ];
 
+// for save data:
+// - store grid cellsData (mostly for water level)
+// - store cropMap (for existing crops and their current locations/levels to add to scene on start)
+// - store collected crops
+// - store current sun level
+// - lastknown player x and y position
+// - also save command manager (for redo and undo stacks)
+
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
   gridCells?: CellData[][] = [];
   // plantMap stores whatever plant exists at the current [row][col] grid cell
   cropMap: Map<string, Crop | null> = new Map();
   player?: Player;
+  playerStartingPosition?: { x: number; y: number };
   collectedCrops: Map<string, number> = new Map(); // to check win condition
 
   // current global conditions across all cells
@@ -82,8 +91,17 @@ export default class Play extends Phaser.Scene {
   // Command Manager
   commandManager: CommandManager = new CommandManager();
 
+  // determines which save file to load game from
+  loadingFrom?: string;
+
   constructor() {
     super("play");
+  }
+
+  init(data: { savefile: string }) {
+    // initialize scene based on which save file is being loaded
+    console.log("init ", data.savefile);
+    this.loadingFrom = data.savefile;
   }
 
   #addKey(
@@ -118,13 +136,20 @@ export default class Play extends Phaser.Scene {
       (this.game.config.height as number) - uIBarHeight,
     );
 
-    // randomize global sun and water level
-    this.randomizeConditions();
-    console.log("Sun Level = " + this.currentSunLevel);
-
-    // initialize collected crops to zero
-    for (const crop of cropOptions) {
-      this.collectedCrops.set(crop.cropName, 0);
+    if (this.loadingFrom! == "newgame") {
+      // randomize global sun and water level
+      this.randomizeConditions();
+      console.log("Sun Level = " + this.currentSunLevel);
+      // initialize collected crops to zero
+      for (const crop of cropOptions) {
+        this.collectedCrops.set(crop.cropName, 0);
+      }
+      // set player starting position
+      this.playerStartingPosition = { x: 30, y: 30 };
+    } else if (this.loadingFrom! == "autosave") {
+      // LOAD FROM AUTOSAVE
+    } else {
+      // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
     }
 
     // draw grid
@@ -163,8 +188,8 @@ export default class Play extends Phaser.Scene {
     // create player
     this.player = new Player(
       this,
-      30,
-      30,
+      this.playerStartingPosition!.x,
+      this.playerStartingPosition!.y,
       "idle_down",
       gridCellWidth,
       gridCellHeight,
