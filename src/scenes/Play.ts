@@ -229,7 +229,7 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[R] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -310,9 +310,9 @@ export default class Play extends Phaser.Scene {
         this.scene.start("menu");
       }
 
-      if (this.undo!.isDown) {
+      if (Phaser.Input.Keyboard.JustDown(this.undo!)) {
         this.commandManager.undoCommand();
-      } else if (this.redo!.isDown) {
+      } else if (Phaser.Input.Keyboard.JustDown(this.redo!)) {
         this.commandManager.redoCommand();
       }
     } else if (!this.sleeping) {
@@ -335,20 +335,14 @@ export default class Play extends Phaser.Scene {
 
   movePlayer() {
     const canMove = this.canMove();
-    const currX: number = this.player!.x;
-    const currY: number = this.player!.y;
 
     if (this.right!.isDown && canMove) {
       this.player!.moveRight();
-      this.moveCommand(currX, currY);
     } else if (this.left!.isDown && canMove) {
       this.player!.moveLeft();
-      this.moveCommand(currX, currY);
     } else if (this.up!.isDown && canMove) {
-      this.moveCommand(currX, currY);
       this.player!.moveUp();
     } else if (this.down!.isDown && canMove) {
-      this.moveCommand(currX, currY);
       this.player!.moveDown();
     } else {
       this.player!.stopMoving();
@@ -387,6 +381,7 @@ export default class Play extends Phaser.Scene {
       const newPlant = new Crop(this, pos.x, pos.y, crop, 1)
         .setOrigin(0, 0)
         .setScale(2);
+      this.moveCommand(this.player!.x, this.player!.y);
       this.cropMap.set(JSON.stringify(key), newPlant);
     }
   }

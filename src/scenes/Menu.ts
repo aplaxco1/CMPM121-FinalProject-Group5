@@ -39,19 +39,19 @@ export default class Menu extends Phaser.Scene {
       this.title.text += "[C] Continue From Last AutoSave\n\n";
     }
     if (localStorage.getItem("savefile01")) {
-      let data = JSON.parse(localStorage.getItem("savefile01")!);
+      const data = JSON.parse(localStorage.getItem("savefile01")!);
       this.title.text += "[1] Save File 01 - [" + data.time + "]\n";
     } else {
       this.title.text += "[1] Save File 01 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile02")) {
-      let data = JSON.parse(localStorage.getItem("savefile02")!);
+      const data = JSON.parse(localStorage.getItem("savefile02")!);
       this.title.text += "[2] Save File 02 - [" + data.time + "]\n";
     } else {
       this.title.text += "[2] Save File 02 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile03")) {
-      let data = JSON.parse(localStorage.getItem("savefile03")!);
+      const data = JSON.parse(localStorage.getItem("savefile03")!);
       this.title.text += "[3] Save File 03 - [" + data.time + "]\n";
     } else {
       this.title.text += "[3] Save File 03 - [EMPTY]\n";
