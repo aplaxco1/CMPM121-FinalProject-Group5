@@ -157,7 +157,7 @@ of game development in a team environment.
 ## Reflection
 
 Over the course of implementing each of the F0 requirements while we have decided to stick with utilizng the Phaser framework and the TypeScript language in the creation of this gardening game, we did encounter
-a few issues regarding the ways in which we had initially set uo the project, and our expectations regarding the transition from using JavaScript to TypeScript in a Phaser project. As dependencies when using
+a few issues regarding the ways in which we had initially set up the project, and our expectations regarding the transition from using JavaScript to TypeScript in a Phaser project. As dependencies when using
 TypeScript as compared to JavaScript work a bit differently, we did face a few complications with our initial expectations regarding how global variables fundtion. In past Phaser projects, when using
 JavaScript, we would simply define global variables in the main.js file, and those could be changed and accessed by any scene within the game, but global variables work much differently in TypeScript. Which impacted how we approached defining and altering variables used by different Phaser scenes and prefabs. In addition to this, we did also have to become more accustumed to the ways in which Phaser objects need
 to be defined in TypeScript, as the specific types or variables need to be more specifically defined and maintained than they do in JavaScript. However, after becoming accustomed to these differences throughout
@@ -246,7 +246,7 @@ even further develop the art and visuals of our game.
 
   The player has access to 3 different save files which they can save the current state of their game into, so that when they return to the menu scene, or exit the game and come back to play at another time,
   they can load one of these save files to pick up where they left off. When the game is saved, a data entry is created to store into local storage, which contains the current state of all the grid cells (x
-  position, y position, and waterLevel), the current sun level, the player's current position, the current lists of commands and list of redo commands, as well as the map of plants, which are converted into a
+  position, y position, and waterLevel), the current sun level, the player's current position, the current list of commands and list of redo commands, as well as the map of plants, which are converted into a
   structure containing its x position, y position, crop specific data, and current growth level. Depending on which of the three save files that the player chooses to save their current game into, the data
   will be saved to a specific entry ("savefile01", "savefile02", or "savefile03"). In the main menu, if the player has previously saved their game to one of the three files, it will appear as an option to
   load the game from one of those files, and the play scene will start with the name of the file being loaded from passed into the scene. Depending on how the play scene was started, if it was a new save, it
@@ -262,3 +262,32 @@ even further develop the art and visuals of our game.
   will save this new game state over the previous autosave.
 
 ## Reflection
+
+In the process of completeing the F1 requirements, and also improving upon some of the aspects we completed for the F0 requirements in terms if how we handled the weather conditionals and teh spatial conditions
+for each of the three crop types, we encountered a few challenges, namely in the implementation of the undo/redo system, which impeded upon our progress a bit. Upon the first conception of our undo/redo system,
+we initially tried to impplement a means of undoing movement commands, via utilizng the command pattern to create commands with execute() and undo() methods that would be handled by a Command Manager class in
+order to pop and push commands off commmand history and redo command stacks. While this ended up working very well, the act of undoing the player's movement commands did not seem to fit in well with our game
+mechanics, as our player is given continuous movement across the grid, and undoing each of these small continuous movements did not seem all that necessary when the player could simply move backwards to wherever they wanted to go. Because of this, we considered either restricting the player's movement to individual cell movements or altering what we considered a "command" that could be undone and redone. 
+Because we wanted to keep our movment system the same, we decided that we would instead focus on implementing undo/redo methods for the primary two commands in the game, those being to "plant" and "harvest" crops. However, we then ran into another issue, as, because all of our commands and our command manager where in a different class, they were unable to access the scene specific variables that they would
+need to access in order to remove or add crops into the play scene. Because of this complication, we ended up completely foregoing the command manager class, and instead implement the undo/redo methods within
+the play scene itself, where they could more directly alter the variables within the scene, as this was a far more viable approach in doing so.
+
+While that was one issue solved, we still had a bit more trouble in implementing these undo/redo methods, and went through a couple different versions of this system in order to get it working the way that we
+wanted it to. Our first method of approaching this system involved creating a seperate map of crops to deal with redo operations, where, whenever the player planted a crop, and then undid that plant command
+the crop would be removed from the primary crop map and instead added to the alternate map which contained all of the crops that were undone and removed from the map, so that they could later be readded if the 
+player were to redo the plant command, the redo map could be looked at to get thecrop to add back to the scene. This map was accompanied by two lists of keys, which would be used to track the row, column cell
+that a plant command was enacted upon, so that the crop contained at that cell could be easily accessed in either map and be altered. However, because of this setup, we had trouble figuring out how we should
+go about implementing undo/redo for the harvest commands in a similar fashion. In order to try and get both commands to work with our undo/redo system, we ended up scrapping our previous implementation and going
+with what we currently have set up, with a command interface that has a particular type, so that depending on the type of command, it could be undone or redone correctly. This implementation still has its flaws,
+as there are a few segements of repeated code in adding and removing crops from the map, so it will need to be refacted a bit to account for this, likely through moving the ability to add or remove crops to
+seperate functions. 
+
+Beyond these difficulties we encountered with the implementation of one of the F1 requirements, we also had some small issues when it came to our usage of ESLint in trying to keep code formatted consistently. 
+A couple of our group members were pushing commits to our repo that had some styling errors, without checking if these errors existied, meaning that when other individuals would pull these changes and try to
+implement their own, they could not push their changes to our repo due to styling errors that were not checked by other individuals. We are likley going to reapproach how we are using ESLint, possibly either be removing some of these checks, as not every individual is checking their code before they push it while some others, or trying to better enforce checking code before it is pushed, so that other individuals do
+not encounter errors when trying to push their changes.
+
+In terms of team roles, we have mostly stuck to the adjustments that were made last week, with the design lead taking responsibility for creating a lot of the art assets and implementing them into the game, the
+engine lead addressing a few issues encountered by our tools alongside the tools lead, and the testing lead aand engine lead taking on primary responsibilities for writing and testing the majority of code. At
+this point, most of our roles are more or less settled, with some group members also taking on a few more responsibilities than they had been the last week to keep up with the new coding requirements and to
+address certain challenges that were faced.
