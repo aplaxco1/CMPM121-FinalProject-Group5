@@ -22,7 +22,7 @@ export class Crop extends Phaser.GameObjects.Sprite {
     const frame = crop.cropName + level;
 
     super(scene, x, y, texture, frame);
-    this.growthLevel = level;
+    this.growthLevel = level | 1;
     this.cropSprite = scene.add.existing(this);
     scene.physics.add.existing(this);
     //scene.physics.add.existing(this.cropSprite);

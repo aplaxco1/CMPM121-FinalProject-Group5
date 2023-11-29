@@ -45,6 +45,9 @@ interface SaveData {
   playerPos: string;
   cropMap: string;
   // save undo/redo stuff
+  undoMap: string;
+  undoKeys: string;
+  redoKeys: string;
 }
 
 export default class Play extends Phaser.Scene {
@@ -60,6 +63,8 @@ export default class Play extends Phaser.Scene {
   undoMap: Map<string, Crop | null> = new Map();
   undoKeys: { x: number; y: number }[] = [];
   redoKeys: { x: number; y: number }[] = [];
+  // Command Manager
+  commandManager: CommandManager = new CommandManager();
 
   // current global conditions across all cells
   currentSunLevel?: number;
@@ -101,9 +106,6 @@ export default class Play extends Phaser.Scene {
   controlsText?: Phaser.GameObjects.Text;
   statusText?: Phaser.GameObjects.Text;
 
-  // Command Manager
-  commandManager: CommandManager = new CommandManager();
-
   // determines which save file to load game from
   loadingFrom?: string;
 
@@ -136,6 +138,20 @@ export default class Play extends Phaser.Scene {
         cropDataMap.set(key, cropInfo);
       }
     });
+
+    const undoDataMap = new Map();
+    this.undoMap.forEach((value: Crop | null, key: string) => {
+      if (value != null) {
+        const cropInfo = {
+          x: value.x,
+          y: value.y,
+          cropOption: value.cropData,
+          cropLevel: value.getGrowthLevel(),
+        };
+        undoDataMap.set(key, cropInfo);
+      }
+    });
+
     const date: Date = new Date();
     const data: SaveData = {
       time: date.toString(),
@@ -144,7 +160,14 @@ export default class Play extends Phaser.Scene {
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
       playerPos: JSON.stringify({ x: this.player!.x, y: this.player!.y }),
       cropMap: JSON.stringify(Array.from(cropDataMap.entries())),
+      // save undo/redo stuff
+      undoMap: JSON.stringify(Array.from(undoDataMap.entries())),
+      undoKeys: JSON.stringify(this.undoKeys),
+      redoKeys: JSON.stringify(this.redoKeys),
     };
+
+    console.log(this.undoKeys);
+    console.log(this.redoKeys);
     localStorage.setItem(savefile, JSON.stringify(data));
   }
 
@@ -155,6 +178,7 @@ export default class Play extends Phaser.Scene {
     this.collectedCrops = new Map(JSON.parse(data.cropInventory));
     this.playerStartingPosition = JSON.parse(data.playerPos);
     this.drawGrid();
+
     const cropDataMap = new Map(JSON.parse(data.cropMap));
     cropDataMap.forEach((value: any, key: any) => {
       const newPlant = new Crop(
@@ -168,6 +192,24 @@ export default class Play extends Phaser.Scene {
         .setScale(2);
       this.cropMap.set(key, newPlant);
     });
+
+    const undoDataMap = new Map(JSON.parse(data.undoMap));
+    undoDataMap.forEach((value: any, key: any) => {
+      const newPlant = new Crop(
+        this,
+        value.x,
+        value.y,
+        value.cropOption,
+        value.cropLevel,
+      )
+        .setOrigin(0, 0)
+        .setScale(2)
+        .setVisible(false); // idk how but this works
+      this.undoMap.set(key, newPlant);
+    });
+
+    this.undoKeys = JSON.parse(data.undoKeys);
+    this.redoKeys = JSON.parse(data.redoKeys);
   }
 
   create() {
@@ -371,6 +413,7 @@ export default class Play extends Phaser.Scene {
   undoPlant() {
     const key = this.undoKeys.pop();
     const currCrop = this.cropMap.get(JSON.stringify(key));
+    console.log(currCrop);
     if (currCrop != null) {
       this.cropMap.set(JSON.stringify(key), null);
       currCrop.destroy();
@@ -381,15 +424,16 @@ export default class Play extends Phaser.Scene {
   redoPlant() {
     const key = this.redoKeys.pop();
     const currCrop = this.undoMap.get(JSON.stringify(key));
+
     if (currCrop != null) {
       const index = this.findOption(currCrop.cropData?.cropName!);
-
+      console.log(index);
       const newPlant = new Crop(
         this,
         currCrop.x,
         currCrop.y,
         cropOptions[index],
-        currCrop.growthLevel,
+        1,
       )
         .setOrigin(0, 0)
         .setScale(2);
@@ -400,6 +444,7 @@ export default class Play extends Phaser.Scene {
 
   findOption(cropName: string): number {
     for (let i = 0; i < cropOptions.length; i++) {
+      console.log(cropName);
       if (cropOptions[i].cropName == cropName) {
         return i;
       }
@@ -435,7 +480,7 @@ export default class Play extends Phaser.Scene {
         .setScale(2);
 
       this.cropMap.set(JSON.stringify(key), newPlant);
-      this.moveCommand(this.player!.x, this.player!.y);
+      //this.moveCommand(this.player!.x, this.player!.y);
       this.addToUndoMap(this.cropMap);
       this.undoKeys.push(key);
     }

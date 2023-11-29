@@ -1,21 +1,8 @@
 import Player from "./Player";
-import { Crop } from "./Crop";
 
 export interface Command {
   execute(): void;
   undo(): void;
-}
-
-export class PlantCommand implements Command {
-  cropMap: Map<string, Crop>;
-
-  constructor(newCropMap: Map<string, Crop>) {
-    this.cropMap = newCropMap;
-  }
-
-  execute(): void {}
-
-  undo(): void {}
 }
 
 export class MoveCommand implements Command {
