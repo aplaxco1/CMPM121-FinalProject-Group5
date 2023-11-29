@@ -453,10 +453,12 @@ export default class Play extends Phaser.Scene {
           cropCount = 1;
         }
         this.collectedCrops.set(currCrop.getPlantName(), cropCount);
+        console.log();
       }
       this.cropMap.set(JSON.stringify(key), null);
       currCrop.destroy();
     }
+    //this.CropStatus();
   }
 
   fadeIn() {
@@ -594,7 +596,16 @@ export default class Play extends Phaser.Scene {
       this.statusText!.text += "No Crop In Cell\n";
     }
   }
+
+  /*CropStatus() {
+    console.log('harvest result: ');
+    for (const s in this.collectedCrops) {      
+        console.log(s);      
+    }
+  }*/
 }
+
+
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
