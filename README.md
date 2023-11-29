@@ -226,17 +226,27 @@ even further develop the art and visuals of our game.
   information of each cell and the crop that exists within that specific cell in the Map of crops on the grid. At the start of play, this AoS is initialized and statically allocated to account for all of the
   row collumn cells in the game with randomized starting water levels. A diagram of the structure for this particular implementation of AoS can be seen below:
 
-  ![F1.a data structure diagram](./AoSDiagram.png)"
+  ![F1.a data structure diagram](./AoSDiagram.png)
 
 - [F1.b] The player must be able to undo every major choice (all the way back to the start of play), even from a saved game. They should be able to redo (undo of undo operations) multiple times.
 
-  IN PROGRESS
+  Within our game, the player has the ability to undo and redo their "plant" and "harvest" commands. When a player does a "planty" or "harvest" command, an object contaning the type of command, the x, y position
+  of the crop being effect, the key of the crop being effected as related to the plant Map, the crop data associated with the crop (its name, conditions to grow), and its current level as of when the command
+  was done is pushed onto a list of commands, acting as a history of all the "plant" and "harvest" commands that the player has done. In order to "undo" one of these commands, the last command is popped off of
+  this command list, and, depending of wether that command was a plant or harvest command, will undo that command and push it onto a list of redo commands. For a plant command, it will log the level that the
+  crop has reached at this point in the game and then remove it from the map, and if it was a harvest command, it will add the crop back at its x, y position at the level it was harvested at (if the crop was
+  fully grown when they harvested it, this means it was added to the players inventory, and so when this command is undone it will also remove that crop from the player's inventory as well). Therefore, when a
+  player chooses to redo a command, then, depending on the type of command, it will pop that command off of the redo list and redo it. For "harvesting" this of course means the crop is removed from the map
+  and added back into the player's inventory if it is at its maximum growth level, and for planting, this means that it will add that plant back to its x, y position on the map, and it will be at the growth
+  level it was when the command was undone rather than from its starting level. If the player undoes a command, it its added to a redo stack, but if the player preforms another command after an undo, the redo
+  stack is cleared. This is to prevent the possibility of having multiple crops in the same position if, for example, the player plants a crop, undoes that command, and plants anothert crop in the same position,
+  the player cannot redo that undone command, as it would place two plants in the same location.
 
 - [F1.c] The player must be able to manually save their progress in the game in a way that allows them to load that save and continue play another day. The player must be able to manage multiple save files (allowing save scumming).
 
   The player has access to 3 different save files which they can save the current state of their game into, so that when they return to the menu scene, or exit the game and come back to play at another time,
   they can load one of these save files to pick up where they left off. When the game is saved, a data entry is created to store into local storage, which contains the current state of all the grid cells (x
-  position, y position, and waterLevel), the current sun level, the player's current position, the current stack of undo and redo commands, as well as the map of plants, which are converted into a
+  position, y position, and waterLevel), the current sun level, the player's current position, the current lists of commands and list of redo commands, as well as the map of plants, which are converted into a
   structure containing its x position, y position, crop specific data, and current growth level. Depending on which of the three save files that the player chooses to save their current game into, the data
   will be saved to a specific entry ("savefile01", "savefile02", or "savefile03"). In the main menu, if the player has previously saved their game to one of the three files, it will appear as an option to
   load the game from one of those files, and the play scene will start with the name of the file being loaded from passed into the scene. Depending on how the play scene was started, if it was a new save, it
