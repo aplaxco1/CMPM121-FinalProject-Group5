@@ -5,7 +5,7 @@ import { Crop, CropOption } from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
-const uIBarHeight: number = 300;
+const uIBarHeight: number = 400;
 
 interface CellData {
   x: number;
@@ -55,6 +55,11 @@ export default class Play extends Phaser.Scene {
   player?: Player;
   playerStartingPosition?: { x: number; y: number };
   collectedCrops: Map<string, number> = new Map(); // to check win condition
+
+  // undo map
+  undoMap: Map<string, Crop | null> = new Map();
+  undoKeys: { x: number; y: number }[] = [];
+  redoKeys: { x: number; y: number }[] = [];
 
   // current global conditions across all cells
   currentSunLevel?: number;
@@ -266,13 +271,13 @@ export default class Play extends Phaser.Scene {
 
       this.displayCurrentCellStatus();
 
-      if (this.placeCrop1!.isDown) {
+      if (Phaser.Input.Keyboard.JustDown(this.placeCrop1!)) {
         this.plant(cropOptions[0]);
       }
-      if (this.placeCrop2!.isDown) {
+      if (Phaser.Input.Keyboard.JustDown(this.placeCrop2!)) {
         this.plant(cropOptions[1]);
       }
-      if (this.placeCrop3!.isDown) {
+      if (Phaser.Input.Keyboard.JustDown(this.placeCrop3!)) {
         this.plant(cropOptions[2]);
       }
 
@@ -312,8 +317,10 @@ export default class Play extends Phaser.Scene {
 
       if (Phaser.Input.Keyboard.JustDown(this.undo!)) {
         this.commandManager.undoCommand();
+        this.undoPlant();
       } else if (Phaser.Input.Keyboard.JustDown(this.redo!)) {
         this.commandManager.redoCommand();
+        this.redoPlant();
       }
     } else if (!this.sleeping) {
       this.player!.stopMoving();
@@ -356,6 +363,50 @@ export default class Play extends Phaser.Scene {
     this.commandManager.executeCommand(moveCommand);
   }
 
+  addToUndoMap(newMap: Map<string, Crop | null>) {
+    this.undoMap.clear();
+    this.undoMap = new Map(newMap);
+  }
+
+  undoPlant() {
+    const key = this.undoKeys.pop();
+    const currCrop = this.cropMap.get(JSON.stringify(key));
+    if (currCrop != null) {
+      this.cropMap.set(JSON.stringify(key), null);
+      currCrop.destroy();
+      this.redoKeys.push(key!);
+    }
+  }
+
+  redoPlant() {
+    const key = this.redoKeys.pop();
+    const currCrop = this.undoMap.get(JSON.stringify(key));
+    if (currCrop != null) {
+      const index = this.findOption(currCrop.cropData?.cropName!);
+
+      const newPlant = new Crop(
+        this,
+        currCrop.x,
+        currCrop.y,
+        cropOptions[index],
+        currCrop.growthLevel,
+      )
+        .setOrigin(0, 0)
+        .setScale(2);
+      this.cropMap.set(JSON.stringify(key), newPlant);
+      this.undoKeys.push(key!);
+    }
+  }
+
+  findOption(cropName: string): number {
+    for (let i = 0; i < cropOptions.length; i++) {
+      if (cropOptions[i].cropName == cropName) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   // prevents diagonal movement
   canMove(): boolean {
     let count = 0;
@@ -374,6 +425,7 @@ export default class Play extends Phaser.Scene {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
     const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
+
     if (
       !this.cropMap.get(JSON.stringify(key)) ||
       this.cropMap.get(JSON.stringify(key)) == null
@@ -381,8 +433,11 @@ export default class Play extends Phaser.Scene {
       const newPlant = new Crop(this, pos.x, pos.y, crop, 1)
         .setOrigin(0, 0)
         .setScale(2);
-      this.moveCommand(this.player!.x, this.player!.y);
+
       this.cropMap.set(JSON.stringify(key), newPlant);
+      this.moveCommand(this.player!.x, this.player!.y);
+      this.addToUndoMap(this.cropMap);
+      this.undoKeys.push(key);
     }
   }
 
