@@ -108,6 +108,7 @@ export default class Play extends Phaser.Scene {
 
   // determines which save file to load game from
   loadingFrom?: string;
+  cropsText: any;
 
   constructor() {
     super("play");
@@ -289,6 +290,15 @@ export default class Play extends Phaser.Scene {
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
+    
+    this.cropsText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 6,
+        "Current Crops:\n",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
 
     // create player
     this.player = new Player(
@@ -312,6 +322,8 @@ export default class Play extends Phaser.Scene {
       this.movePlayer();
 
       this.displayCurrentCellStatus();
+      this.CropStatus();
+
 
       if (Phaser.Input.Keyboard.JustDown(this.placeCrop1!)) {
         this.plant(cropOptions[0]);
@@ -503,7 +515,7 @@ export default class Play extends Phaser.Scene {
       this.cropMap.set(JSON.stringify(key), null);
       currCrop.destroy();
     }
-    //this.CropStatus();
+   
   }
 
   fadeIn() {
@@ -642,12 +654,16 @@ export default class Play extends Phaser.Scene {
     }
   }
 
-  /*CropStatus() {
-    console.log('harvest result: ');
-    for (const s in this.collectedCrops) {      
-        console.log(s);      
-    }
-  }*/
+  CropStatus() {
+    this.cropsText!.text ="Harvest result: ";
+    this.cropsText!.text += "Strawberry "; 
+    this.cropsText!.text += this.collectedCrops.get("Strawberry");  
+    this.cropsText!.text += " Potato "; 
+    this.cropsText!.text += this.collectedCrops.get("Potato");  
+    this.cropsText!.text += " Corn "; 
+    this.cropsText!.text += this.collectedCrops.get("Corn");  
+    //}
+  }
 }
 
 
