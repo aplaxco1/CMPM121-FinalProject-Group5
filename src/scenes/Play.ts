@@ -6,7 +6,7 @@ import { Crop, CropOption } from "../classes/Crop.ts";
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 400;
-
+const suncolor= [0x34b070,0x6F95B8,0x785871,0xB37050,0xF7A53B,0xFFD134];
 interface CellData {
   x: number;
   y: number;
@@ -179,6 +179,7 @@ export default class Play extends Phaser.Scene {
     this.collectedCrops = new Map(JSON.parse(data.cropInventory));
     this.playerStartingPosition = JSON.parse(data.playerPos);
     this.drawGrid();
+    this.updateSun();
 
     const cropDataMap = new Map(JSON.parse(data.cropMap));
     cropDataMap.forEach((value: any, key: any) => {
@@ -254,6 +255,7 @@ export default class Play extends Phaser.Scene {
       // set player starting position
       this.playerStartingPosition = { x: 30, y: 30 };
       this.drawGrid();
+      this.updateSun();
     } else if (this.loadingFrom! == "autosave") {
       this.loadGame(this.loadingFrom);
     } else {
@@ -345,6 +347,8 @@ export default class Play extends Phaser.Scene {
         this.sleeping = true;
         this.player!.stopMoving();
         this.cameras.main.fadeOut(1000);
+        this.updateSun();
+        
         this.time.delayedCall(1000, this.fadeIn, [], this);
         this.time.delayedCall(2000, this.playerWake, [], this);
       }
@@ -563,6 +567,10 @@ export default class Play extends Phaser.Scene {
         cellRect.isStroked = true;
       }
     }
+  }
+
+  updateSun() {
+    this.add.circle(760, 10, 30, suncolor[this.currentSunLevel!]);//.setAlpha(0.8);
   }
 
   growPlants() {
