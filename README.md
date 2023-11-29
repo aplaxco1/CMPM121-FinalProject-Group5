@@ -226,7 +226,7 @@ even further develop the art and visuals of our game.
   information of each cell and the crop that exists within that specific cell in the Map of crops on the grid. At the start of play, this AoS is initialized and statically allocated to account for all of the
   row collumn cells in the game with randomized starting water levels. A diagram of the structure for this particular implementation of AoS can be seen below:
 
-  ADD DIAGRAM IMAGE HERE
+  ![F1.a data structure diagram](./AoSDiagram.png)"
 
 - [F1.b] The player must be able to undo every major choice (all the way back to the start of play), even from a saved game. They should be able to redo (undo of undo operations) multiple times.
 
