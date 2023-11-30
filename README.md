@@ -285,6 +285,12 @@ with what we currently have set up, with a command interface that has a particul
 as there are a few segements of repeated code in adding and removing crops from the map, so it will need to be refacted a bit to account for this, likely through moving the ability to add or remove crops to
 seperate functions. 
 
+We also faced a bit of trouble with the contiguous byte array requirement, mostly because we had misunderstood the requirement at first. We had originally thought that what were were meant to do was simply
+store the information contained within the grid in an Array of Structures or Structure of Arrays format, and that the array of structures we already had implemented fufilled thsi requirement. However, we later
+learned that this conception of the requirement was false and that the AoS or SoA structure was meant to be contained within a continuous byte array, not a regular array, and that we needed to use an Array
+Buffer with DataView objects to index into this array buffer based on the byte size of the data structures to get the values stored at certain location in memory. After learning more about the specific of 
+the requirement, we werte able to correct this misunderstanding and properly implement it as a true contiguous byte array.
+
 Beyond these difficulties we encountered with the implementation of one of the F1 requirements, we also had some small issues when it came to our usage of ESLint in trying to keep code formatted consistently. 
 A couple of our group members were pushing commits to our repo that had some styling errors, without checking if these errors existied, meaning that when other individuals would pull these changes and try to
 implement their own, they could not push their changes to our repo due to styling errors that were not checked by other individuals. We are likley going to reapproach how we are using ESLint, possibly either be removing some of these checks, as not every individual is checking their code before they push it while some others, or trying to better enforce checking code before it is pushed, so that other individuals do
