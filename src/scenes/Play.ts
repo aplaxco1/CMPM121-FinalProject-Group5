@@ -6,7 +6,38 @@ import { Crop, CropOption } from "../classes/Crop.ts";
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 300;
-const suncolor= [0x34b070,0x6F95B8,0x785871,0xB37050,0xF7A53B,0xFFD134];
+const suncolor = [0x34b070, 0x6f95b8, 0x785871, 0xb37050, 0xf7a53b, 0xffd134];
+
+class Cell {
+  static readonly numBytes = 4 + 4 + 4;
+
+  constructor(private dataView: DataView) {}
+
+  get x(): number {
+    return this.dataView.getUint32(0);
+  }
+
+  set x(i: number) {
+    this.dataView.setUint32(0, i);
+  }
+
+  get y(): number {
+    return this.dataView.getUint32(4);
+  }
+
+  set y(i: number) {
+    this.dataView.setUint32(4, i);
+  }
+
+  get waterLevel(): number {
+    return this.dataView.getUint32(8);
+  }
+
+  set waterLevel(i: number) {
+    this.dataView.setUint32(8, i);
+  }
+}
+
 interface CellData {
   x: number;
   y: number;
@@ -59,7 +90,8 @@ interface SaveData {
 
 export default class Play extends Phaser.Scene {
   // gridCells cells stores the x, y position for each [row][col] cell in the game
-  gridCells?: CellData[][] = [];
+  gridCells?: Cell[][] = [];
+  arrayBuffer?: ArrayBuffer;
   // plantMap stores whatever plant exists at the current [row][col] grid cell
   cropMap: Map<string, Crop | null> = new Map();
   player?: Player;
@@ -144,10 +176,19 @@ export default class Play extends Phaser.Scene {
       }
     });
 
+    let cellList: CellData[][] = [];
+    for (let col of this.gridCells!) {
+      let list: CellData[] = [];
+      for (let row of col) {
+        list.push({ x: row.x, y: row.y, waterLevel: row.waterLevel });
+      }
+      cellList.push(list);
+    }
+
     const date: Date = new Date();
     const data: SaveData = {
       time: date.toString(),
-      gridData: JSON.stringify(this.gridCells),
+      gridData: JSON.stringify(cellList),
       sunLevel: this.currentSunLevel!.toString(),
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
       playerPos: JSON.stringify({ x: this.player!.x, y: this.player!.y }),
@@ -162,11 +203,36 @@ export default class Play extends Phaser.Scene {
 
   loadGame(savefile: string) {
     const data: SaveData = JSON.parse(localStorage.getItem(savefile)!);
-    this.gridCells = JSON.parse(data.gridData);
+    let cellList: CellData[][] = JSON.parse(data.gridData);
+    for (
+      let x = 0;
+      x < (this.game.config.width as number) / gridCellWidth;
+      x += 1
+    ) {
+      const currCol: Cell[] = [];
+      for (
+        let y = 0;
+        y <
+        ((this.game.config.height as number) - uIBarHeight) / gridCellHeight;
+        y += 1
+      ) {
+        const currX = cellList[x][y].x;
+        const currY = cellList[x][y].y;
+        const index = cellList[0].length * x + y;
+        const cell = new Cell(
+          new DataView(this.arrayBuffer!, index * Cell.numBytes),
+        );
+        cell.x = currX;
+        cell.y = currY;
+        cell.waterLevel = cellList[x][y].waterLevel;
+        currCol.push(cell);
+      }
+      this.gridCells?.push(currCol);
+    }
+    this.drawGrid();
     this.currentSunLevel = parseInt(data.sunLevel);
     this.collectedCrops = new Map(JSON.parse(data.cropInventory));
     this.playerStartingPosition = JSON.parse(data.playerPos);
-    this.drawGrid();
     this.updateSun();
 
     const cropDataMap = new Map(JSON.parse(data.cropMap));
@@ -215,6 +281,12 @@ export default class Play extends Phaser.Scene {
       0,
       this.game.config.width as number,
       (this.game.config.height as number) - uIBarHeight,
+    );
+
+    this.arrayBuffer = new ArrayBuffer(
+      ((this.game.config.width as number) / gridCellWidth) *
+        (((this.game.config.height as number) - uIBarHeight) / gridCellHeight) *
+        Cell.numBytes,
     );
 
     if (this.loadingFrom! == "newgame") {
@@ -321,7 +393,7 @@ export default class Play extends Phaser.Scene {
         this.player!.stopMoving();
         this.cameras.main.fadeOut(1000);
         this.updateSun();
-        
+
         this.time.delayedCall(1000, this.fadeIn, [], this);
         this.time.delayedCall(2000, this.playerWake, [], this);
       }
@@ -568,7 +640,7 @@ export default class Play extends Phaser.Scene {
       x < (this.game.config.width as number) / gridCellWidth;
       x++
     ) {
-      const currCol: CellData[] = [];
+      const currCol: Cell[] = [];
       for (
         let y = 0;
         y <
@@ -577,11 +649,18 @@ export default class Play extends Phaser.Scene {
       ) {
         const currX = x * gridCellWidth;
         const currY = y * gridCellHeight;
-        currCol.push({
-          x: currX,
-          y: currY,
-          waterLevel: randomInt(1, 5),
-        });
+        const index =
+          (((this.game.config.height as number) - uIBarHeight) /
+            gridCellHeight) *
+            x +
+          y;
+        const cell = new Cell(
+          new DataView(this.arrayBuffer!, index * Cell.numBytes),
+        );
+        cell.x = currX;
+        cell.y = currY;
+        cell.waterLevel = randomInt(1, 5);
+        currCol.push(cell);
       }
       this.gridCells?.push(currCol);
     }
@@ -599,7 +678,7 @@ export default class Play extends Phaser.Scene {
   }
 
   updateSun() {
-    this.add.circle(760, 10, 30, suncolor[this.currentSunLevel!]);//.setAlpha(0.8);
+    this.add.circle(760, 10, 30, suncolor[this.currentSunLevel!]); //.setAlpha(0.8);
   }
 
   growPlants() {
