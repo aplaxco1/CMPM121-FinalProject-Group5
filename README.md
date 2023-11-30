@@ -220,11 +220,14 @@ even further develop the art and visuals of our game.
 
 - [F1.a] The important state of each cell of your game’s grid must be backed by a single contiguous byte array in AoS or SoA format. Your team must statically allocate memory usage for the whole grid.
 
-  This particular feature was included within our game since last week, though it has been slightly altered to account for the change in water levels. Now, each cell stores an x position, y position, and also
-  a water level which is updated each turn. The way that our game stores the information for each grid cell is in the AoS (array of structures) format, where there exists an array of arrays that contain these
-  structures for storing the row, collumn specifc cell's information. We decided to stick with this array of array of structures format, so that the array could be easily indexed into based on the row and column
-  information of each cell and the crop that exists within that specific cell in the Map of crops on the grid. At the start of play, this AoS is initialized and statically allocated to account for all of the
-  row collumn cells in the game with randomized starting water levels. A diagram of the structure for this particular implementation of AoS can be seen below:
+  In the implementation of this feature, we created a Cell class, which was constructed from a DataView object into a particular index within an ArrayBuffer, which acted as our continuous byte array. This
+  cell class contains methods for accessing all of the cell's relevant information through index offsetting, these including the x position and y position of the cell in relation to the game world, as well as
+  the cell's current water level. In order to store each off these Cell DataView objects, we utilized the array of array structures previously utilized for past requirements, and stored each row, column cell
+  in its correspodning index within this array. The actual data for each of these cells however, is conatined within an ArrayBuffer, which is statically allocated at the start of the play scene to contain all
+  possible row, column cells. In this sense, the method through which this data is accessed remains the same, the array of arrays of Cells is indexed into at the corresponding row, column cell, and its data can
+  then be accessed through the class's get and set methods, which index into the ArrayBuffer to access the specific x, y, and waterLevel values contained at that index in the byte array. In this sense then,
+  our byte array follows the Array of Structures format, as it takes the form of a byte array containing structures of specifically sized information. A diagram of the Array of Structures format that we
+  implemented can be seen below:
 
   ![F1.a data structure diagram](./AoSDiagram.png)
 
