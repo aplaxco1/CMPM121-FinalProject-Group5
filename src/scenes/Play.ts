@@ -107,6 +107,9 @@ export default class Play extends Phaser.Scene {
   currentSunLevel?: number;
   sleeping: boolean = false;
 
+  numColumns?: number;
+  numRows?: number;
+
   // list of keyboard inputs //
   // for player movement
   movementInputs?: Phaser.Input.Keyboard.Key[];
@@ -204,25 +207,12 @@ export default class Play extends Phaser.Scene {
   loadGame(savefile: string) {
     const data: SaveData = JSON.parse(localStorage.getItem(savefile)!);
     let cellList: CellData[][] = JSON.parse(data.gridData);
-    for (
-      let x = 0;
-      x < (this.game.config.width as number) / gridCellWidth;
-      x += 1
-    ) {
+    for (let x = 0; x < this.numRows!; x += 1) {
       const currCol: Cell[] = [];
-      for (
-        let y = 0;
-        y <
-        ((this.game.config.height as number) - uIBarHeight) / gridCellHeight;
-        y += 1
-      ) {
+      for (let y = 0; y < this.numColumns!; y += 1) {
         const currX = cellList[x][y].x;
         const currY = cellList[x][y].y;
-        const index =
-          (((this.game.config.height as number) - uIBarHeight) /
-            gridCellHeight) *
-            x +
-          y;
+        const index = this.numColumns! * x + y;
         const cell = new Cell(
           new DataView(this.arrayBuffer!, index * Cell.numBytes),
         );
@@ -279,6 +269,10 @@ export default class Play extends Phaser.Scene {
     this.save3 = this.#addKey("F3");
     this.return = this.#addKey("ESC");
 
+    this.numRows = (this.game.config.width as number) / gridCellWidth;
+    this.numColumns =
+      ((this.game.config.height as number) - uIBarHeight) / gridCellHeight;
+
     // set world bounds so player cannot move outside of them
     this.physics.world.setBounds(
       0,
@@ -288,9 +282,7 @@ export default class Play extends Phaser.Scene {
     );
 
     this.arrayBuffer = new ArrayBuffer(
-      ((this.game.config.width as number) / gridCellWidth) *
-        (((this.game.config.height as number) - uIBarHeight) / gridCellHeight) *
-        Cell.numBytes,
+      this.numRows * this.numColumns * Cell.numBytes,
     );
 
     if (this.loadingFrom! == "newgame") {
@@ -639,25 +631,12 @@ export default class Play extends Phaser.Scene {
   }
 
   initializeGrid() {
-    for (
-      let x = 0;
-      x < (this.game.config.width as number) / gridCellWidth;
-      x++
-    ) {
+    for (let x = 0; x < this.numRows!; x++) {
       const currCol: Cell[] = [];
-      for (
-        let y = 0;
-        y <
-        ((this.game.config.height as number) - uIBarHeight) / gridCellHeight;
-        y++
-      ) {
+      for (let y = 0; y < this.numColumns!; y++) {
         const currX = x * gridCellWidth;
         const currY = y * gridCellHeight;
-        const index =
-          (((this.game.config.height as number) - uIBarHeight) /
-            gridCellHeight) *
-            x +
-          y;
+        const index = this.numColumns! * x + y;
         const cell = new Cell(
           new DataView(this.arrayBuffer!, index * Cell.numBytes),
         );
