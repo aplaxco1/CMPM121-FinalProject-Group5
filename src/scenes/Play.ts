@@ -218,7 +218,11 @@ export default class Play extends Phaser.Scene {
       ) {
         const currX = cellList[x][y].x;
         const currY = cellList[x][y].y;
-        const index = cellList[0].length * x + y;
+        const index =
+          (((this.game.config.height as number) - uIBarHeight) /
+            gridCellHeight) *
+            x +
+          y;
         const cell = new Cell(
           new DataView(this.arrayBuffer!, index * Cell.numBytes),
         );
