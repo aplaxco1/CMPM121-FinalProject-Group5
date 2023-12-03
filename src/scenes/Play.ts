@@ -546,7 +546,7 @@ export default class Play extends Phaser.Scene {
       // if it was a harvest command, put the plant back
       if (currCommand.type == "harvest") {
         // if crop was collected, remove it from inventory
-        if (currCommand.cropLevel >= 6) {
+        if (currCommand.cropLevel >= currCommand.cropOption.maxGrowthLevel) {
           let cropCount = this.collectedCrops.get(
             currCommand.cropOption.cropName,
           );
@@ -590,7 +590,7 @@ export default class Play extends Phaser.Scene {
       }
       if (currCommand.type == "harvest") {
         // if crop was collected, add it back to inventory
-        if (currCommand.cropLevel >= 6) {
+        if (currCommand.cropLevel >= currCommand.cropOption.maxGrowthLevel) {
           let cropCount = this.collectedCrops.get(
             currCommand.cropOption.cropName,
           );
@@ -664,7 +664,7 @@ export default class Play extends Phaser.Scene {
     const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
     const currCrop = this.cropMap.get(JSON.stringify(key));
     if (currCrop != null) {
-      if (currCrop.growthLevel == 6) {
+      if (currCrop.growthLevel == currCrop.cropData!.maxGrowthLevel) {
         let cropCount = this.collectedCrops.get(currCrop.getPlantName());
         if (cropCount) {
           cropCount += 1;
