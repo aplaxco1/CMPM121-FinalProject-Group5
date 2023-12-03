@@ -1,0 +1,21 @@
+- scenario: tutorial
+  available_crops:
+    - Strawberry
+    - Potato
+    - Corn
+  win_conditions:
+    - [Strawberry, 5]
+  human_instructions: "Grow 5 Strawberries"
+
+- scenario: rainy
+  available_crops:
+    - Strawberry
+    - Potato
+    - Corn
+  win_conditions:
+    - [Strawberry, 5]
+    - [Potato, 5]
+    - [Corn, 5]
+  sun_probability: 0.30
+  rain_probability: 0.80
+  human_instructions: "Grow 5 of Each Crop in a Rainy Season"

@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
-import { CommandManager, MoveCommand } from "../classes/Command.ts";
+import { scenario } from "../scenes/Menu.ts";
 import {
   Crop,
   CropOption,
@@ -131,7 +131,7 @@ interface command {
   key: string;
   x: number;
   y: number;
-  cropOption: CropOption;
+  cropIndex: number;
   cropLevel: number;
 }
 
@@ -144,6 +144,7 @@ interface SaveData {
   cropMap: string;
   commandList: string;
   redoList: string;
+  scenarioIndex: string;
 }
 
 export default class Play extends Phaser.Scene {
@@ -157,7 +158,6 @@ export default class Play extends Phaser.Scene {
   collectedCrops: Map<string, number> = new Map(); // to check win condition
 
   // Command Manager
-  commandManager: CommandManager = new CommandManager();
   commandList: command[] = [];
   redoList: command[] = [];
 
@@ -165,6 +165,16 @@ export default class Play extends Phaser.Scene {
   currentSunLevel?: number;
   currCropIndex: number = 0;
   sleeping: boolean = false;
+
+  // scenario specific information
+  scenarioData?: scenario[];
+  allScenariosCompleted: boolean = false;
+  currScenarioIndex: number = 0;
+  // these all change based current on scenario index
+  possibleCropIndicies: number[] = [];
+  currWinConditions: [string, number][] = [];
+  currSunProbability: number = 0.7;
+  currRainProbability: number = 0.3;
 
   numColumns?: number;
   numRows?: number;
@@ -199,11 +209,12 @@ export default class Play extends Phaser.Scene {
     align: "center",
     fontSize: "22px",
   };
-  cropsText: any;
   winText?: Phaser.GameObjects.Text;
   controlsText?: Phaser.GameObjects.Text;
+  objectiveText?: Phaser.GameObjects.Text;
   cropText?: Phaser.GameObjects.Text;
   statusText?: Phaser.GameObjects.Text;
+  inventoryText?: Phaser.GameObjects.Text;
 
   // determines which save file to load game from
   loadingFrom?: string;
@@ -212,9 +223,11 @@ export default class Play extends Phaser.Scene {
     super("play");
   }
 
-  init(data: { savefile: string }) {
+  init(data: { scenarioData: scenario[]; savefile: string }) {
     // initialize scene based on which save file is being loaded
     this.loadingFrom = data.savefile;
+    this.scenarioData = data.scenarioData;
+    console.log(this.scenarioData);
   }
 
   #addKey(
@@ -257,6 +270,7 @@ export default class Play extends Phaser.Scene {
       // save undo/redo stuff
       commandList: JSON.stringify(this.commandList),
       redoList: JSON.stringify(this.redoList),
+      scenarioIndex: this.currScenarioIndex.toString(),
     };
 
     localStorage.setItem(savefile, JSON.stringify(data));
@@ -303,6 +317,24 @@ export default class Play extends Phaser.Scene {
 
     this.commandList = JSON.parse(data.commandList);
     this.redoList = JSON.parse(data.redoList);
+
+    this.currScenarioIndex = parseInt(data.scenarioIndex);
+  }
+
+  loadCurrentScenario(scenarioIndex: number) {
+    const currScenario = this.scenarioData![scenarioIndex];
+    this.possibleCropIndicies = [];
+    for (const crop of currScenario.available_crops) {
+      const index = this.findOption(crop);
+      this.possibleCropIndicies.push(index);
+    }
+    this.currWinConditions = currScenario.win_conditions;
+    if (currScenario.sun_probability) {
+      this.currSunProbability = currScenario.sun_probability;
+    }
+    if (currScenario.rain_probability) {
+      this.currRainProbability = currScenario.rain_probability;
+    }
   }
 
   create() {
@@ -357,10 +389,11 @@ export default class Play extends Phaser.Scene {
     } else {
       // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
       this.loadGame(this.loadingFrom!);
-      this.cropMap.forEach((value: any, key: any) => {
-        console.log(key, value);
-      });
     }
+
+    // load in scenario specific data
+    this.loadCurrentScenario(this.currScenarioIndex);
+    this.allScenariosCompleted = false;
 
     // draw UI bar
     this.add
@@ -378,7 +411,17 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.objectiveText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 1.5,
+        "CurrentObjective: " +
+          this.scenarioData![this.currScenarioIndex].human_instructions,
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -401,7 +444,7 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
-    this.cropsText = this.add
+    this.inventoryText = this.add
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight / 6,
@@ -424,24 +467,28 @@ export default class Play extends Phaser.Scene {
 
   update() {
     // test win condition is to collect 5 trees
-    if (
-      this.collectedCrops.get(cropOptions[0].cropName)! < 5 &&
-      !this.sleeping
-    ) {
+    if (!this.sleeping && !this.allScenariosCompleted) {
+      this.checkCurrentWinCondition();
+
       // simple player movement
       this.movePlayer();
 
+      // update all text
       this.cropText!.text =
-        "Current Crop Selected: " + cropOptions[this.currCropIndex].cropName;
+        "Current Crop Selected: " +
+        cropOptions[this.possibleCropIndicies[this.currCropIndex]].cropName;
+      this.objectiveText!.text =
+        "Current Objective: " +
+        this.scenarioData![this.currScenarioIndex].human_instructions;
       this.displayCurrentCellStatus();
-      this.CropStatus();
+      this.displayInventory();
 
       if (Phaser.Input.Keyboard.JustDown(this.placeCrop!)) {
         this.plant(cropOptions[this.currCropIndex]);
       }
       if (Phaser.Input.Keyboard.JustDown(this.cycleCrop!)) {
         this.currCropIndex += 1;
-        if (this.currCropIndex >= cropOptions.length) {
+        if (this.currCropIndex >= this.possibleCropIndicies.length) {
           this.currCropIndex = 0;
         }
       }
@@ -483,10 +530,8 @@ export default class Play extends Phaser.Scene {
       }
 
       if (Phaser.Input.Keyboard.JustDown(this.undo!)) {
-        this.commandManager.undoCommand();
         this.undoCommand();
       } else if (Phaser.Input.Keyboard.JustDown(this.redo!)) {
-        this.commandManager.redoCommand();
         this.redoCommand();
       }
     } else if (!this.sleeping) {
@@ -504,6 +549,38 @@ export default class Play extends Phaser.Scene {
         this.scene.stop();
         this.scene.start("menu");
       }
+    }
+  }
+
+  checkCurrentWinCondition(): boolean {
+    for (let condition of this.currWinConditions) {
+      if (this.collectedCrops.get(condition[0])! < condition[1]) {
+        return false;
+      }
+    }
+    this.progressToNextScenario();
+    return true;
+  }
+
+  progressToNextScenario() {
+    this.currScenarioIndex += 1;
+    if (this.currScenarioIndex >= this.scenarioData!.length) {
+      this.currScenarioIndex -= 1;
+      this.allScenariosCompleted = true;
+    } else {
+      alert("Next objective!");
+      this.loadCurrentScenario(this.currScenarioIndex);
+      this.cropMap.forEach((value: any, key: any) => {
+        if (value != null) {
+          value.destroy();
+        }
+        this.cropMap.set(key, null);
+      });
+      this.collectedCrops.forEach((value: any, key: any) => {
+        this.collectedCrops.set(key, value - value);
+      });
+      this.randomizeConditions();
+      this.saveGame("autosave");
     }
   }
 
@@ -525,9 +602,18 @@ export default class Play extends Phaser.Scene {
     this.player!.setCurrCell();
   }
 
-  moveCommand(prevX: number, prevY: number): void {
-    const moveCommand = new MoveCommand(this.player!, prevX, prevY);
-    this.commandManager.executeCommand(moveCommand);
+  // prevents diagonal movement
+  canMove(): boolean {
+    let count = 0;
+    for (const key of this.movementInputs!) {
+      if (key.isDown) {
+        count += 1;
+      }
+    }
+    if (count > 1) {
+      return false;
+    }
+    return true;
   }
 
   undoCommand() {
@@ -546,22 +632,28 @@ export default class Play extends Phaser.Scene {
       // if it was a harvest command, put the plant back
       if (currCommand.type == "harvest") {
         // if crop was collected, remove it from inventory
-        if (currCommand.cropLevel >= currCommand.cropOption.maxGrowthLevel) {
+        if (
+          currCommand.cropLevel >=
+          cropOptions[currCommand.cropIndex].maxGrowthLevel
+        ) {
           let cropCount = this.collectedCrops.get(
-            currCommand.cropOption.cropName,
+            cropOptions[currCommand.cropIndex].cropName,
           );
           if (cropCount) {
             cropCount -= 1;
           } else {
             cropCount = 0;
           }
-          this.collectedCrops.set(currCommand.cropOption.cropName, cropCount);
+          this.collectedCrops.set(
+            cropOptions[currCommand.cropIndex].cropName,
+            cropCount,
+          );
         }
         let currCrop = new Crop(
           this,
           currCommand.x,
           currCommand.y,
-          currCommand.cropOption,
+          cropOptions[currCommand.cropIndex],
           currCommand.cropLevel,
         )
           .setOrigin(0, 0)
@@ -581,7 +673,7 @@ export default class Play extends Phaser.Scene {
           this,
           currCommand.x,
           currCommand.y,
-          currCommand.cropOption,
+          cropOptions[currCommand.cropIndex],
           currCommand.cropLevel,
         )
           .setOrigin(0, 0)
@@ -590,16 +682,22 @@ export default class Play extends Phaser.Scene {
       }
       if (currCommand.type == "harvest") {
         // if crop was collected, add it back to inventory
-        if (currCommand.cropLevel >= currCommand.cropOption.maxGrowthLevel) {
+        if (
+          currCommand.cropLevel >=
+          cropOptions[currCommand.cropIndex].maxGrowthLevel
+        ) {
           let cropCount = this.collectedCrops.get(
-            currCommand.cropOption.cropName,
+            cropOptions[currCommand.cropIndex].cropName,
           );
           if (cropCount) {
             cropCount += 1;
           } else {
             cropCount = 1;
           }
-          this.collectedCrops.set(currCommand.cropOption.cropName, cropCount);
+          this.collectedCrops.set(
+            cropOptions[currCommand.cropIndex].cropName,
+            cropCount,
+          );
         }
         let currCrop = this.cropMap.get(currCommand.key);
         if (currCrop) {
@@ -617,20 +715,6 @@ export default class Play extends Phaser.Scene {
       }
     }
     return 0;
-  }
-
-  // prevents diagonal movement
-  canMove(): boolean {
-    let count = 0;
-    for (const key of this.movementInputs!) {
-      if (key.isDown) {
-        count += 1;
-      }
-    }
-    if (count > 1) {
-      return false;
-    }
-    return true;
   }
 
   plant(crop: CropOption) {
@@ -651,7 +735,7 @@ export default class Play extends Phaser.Scene {
         key: JSON.stringify(key),
         x: pos.x,
         y: pos.y,
-        cropOption: crop,
+        cropIndex: this.findOption(crop.cropName),
         cropLevel: 1,
       });
       this.redoList.splice(0, this.redoList.length);
@@ -664,7 +748,7 @@ export default class Play extends Phaser.Scene {
     const key = { x: this.player!.currCell!.x, y: this.player!.currCell!.y };
     const currCrop = this.cropMap.get(JSON.stringify(key));
     if (currCrop != null) {
-      if (currCrop.growthLevel == currCrop.cropData!.maxGrowthLevel) {
+      if (currCrop.growthLevel >= currCrop.cropData!.maxGrowthLevel) {
         let cropCount = this.collectedCrops.get(currCrop.getPlantName());
         if (cropCount) {
           cropCount += 1;
@@ -678,7 +762,7 @@ export default class Play extends Phaser.Scene {
         key: JSON.stringify(key),
         x: currCrop.x,
         y: currCrop.y,
-        cropOption: currCrop.cropData!,
+        cropIndex: this.findOption(currCrop.cropData!.cropName),
         cropLevel: currCrop.growthLevel,
       });
       this.redoList.splice(0, this.redoList.length);
@@ -781,8 +865,13 @@ export default class Play extends Phaser.Scene {
   }
 
   randomizeConditions() {
-    this.currentSunLevel = randomInt(1, 5);
-    const rained = Math.random() < 0.3;
+    const sunny = Math.random() < this.currSunProbability;
+    if (sunny) {
+      this.currentSunLevel = randomInt(4, 5);
+    } else {
+      this.currentSunLevel = randomInt(1, 5);
+    }
+    const rained = Math.random() < this.currRainProbability;
     if (rained) {
       console.log("It rained!");
     }
@@ -833,11 +922,11 @@ export default class Play extends Phaser.Scene {
     }
   }
 
-  CropStatus() {
-    this.cropsText!.text = "Harvest result: ";
+  displayInventory() {
+    this.inventoryText!.text = "Harvest Result: ";
     for (let crop of cropOptions) {
-      this.cropsText!.text += crop.cropName + " ";
-      this.cropsText!.text += this.collectedCrops.get(crop.cropName) + ", ";
+      this.inventoryText!.text += crop.cropName + " ";
+      this.inventoryText!.text += this.collectedCrops.get(crop.cropName) + ", ";
     }
   }
 }

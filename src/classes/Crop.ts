@@ -58,10 +58,9 @@ export class Crop extends Phaser.GameObjects.Sprite {
   }
 
   increaseGrowthLevel(): void {
+    this.growthLevel += 1;
     if (this.growthLevel >= this.cropData!.maxGrowthLevel) {
       this.growthLevel = this.cropData!.maxGrowthLevel;
-    } else {
-      this.growthLevel++;
     }
   }
 
@@ -69,7 +68,6 @@ export class Crop extends Phaser.GameObjects.Sprite {
     if (this.cropData!.canGrow(growthContext)) {
       this.increaseGrowthLevel();
     }
-    console.log(this.growthLevel);
     const frame = this.cropData!.cropName + this.growthLevel.toString();
     this.cropSprite.setFrame(frame);
   }

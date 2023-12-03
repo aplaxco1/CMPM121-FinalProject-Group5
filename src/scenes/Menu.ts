@@ -1,6 +1,15 @@
 import * as Phaser from "phaser";
 import YAML from "yamljs";
-import detailsURL from "/assets/details.yml?url";
+import scenariosURL from "/assets/scenarios.yml?url";
+
+export interface scenario {
+  scenario: string;
+  available_crops: string[];
+  win_conditions: [string, number][];
+  human_instructions: string;
+  sun_probability?: number;
+  rain_probability?: number;
+}
 
 export default class Menu extends Phaser.Scene {
   title?: Phaser.GameObjects.Text;
@@ -10,12 +19,14 @@ export default class Menu extends Phaser.Scene {
   loadSaveFile02?: Phaser.Input.Keyboard.Key;
   loadSaveFile03?: Phaser.Input.Keyboard.Key;
 
+  scenarioData: scenario[] = [];
+
   constructor() {
     super("menu");
   }
 
   preload() {
-    this.load.text("details", detailsURL);
+    this.load.text("scenarios", scenariosURL);
   }
 
   #addKey(
@@ -27,10 +38,10 @@ export default class Menu extends Phaser.Scene {
   create() {
     //localStorage.clear();
 
-    // testing stuff for external dsl
-    const details = this.cache.text.get("details");
-    const result_json = YAMLtoJSON(details);
-    console.log(result_json);
+    // load scenario data from external dsl text file
+    const details = this.cache.text.get("scenarios");
+    const details_json = YAMLtoJSON(details);
+    this.scenarioData = JSON.parse(details_json);
 
     const menuConfig = {
       align: "center",
@@ -76,40 +87,42 @@ export default class Menu extends Phaser.Scene {
 
   update() {
     if (Phaser.Input.Keyboard.JustDown(this.start!)) {
-      this.scene.stop();
-      this.scene.start("play", { savefile: "newgame" });
+      this.startGame("newgame");
     }
     if (
       Phaser.Input.Keyboard.JustDown(this.loadAutoSave!) &&
       localStorage.getItem("autosave")
     ) {
-      this.scene.stop();
-      this.scene.start("play", { savefile: "autosave" });
+      this.startGame("autosave");
     }
     if (
       Phaser.Input.Keyboard.JustDown(this.loadSaveFile01!) &&
       localStorage.getItem("savefile01")
     ) {
-      this.scene.stop();
-      this.scene.start("play", { savefile: "savefile01" });
+      this.startGame("savefile01");
     }
     if (
       Phaser.Input.Keyboard.JustDown(this.loadSaveFile02!) &&
       localStorage.getItem("savefile02")
     ) {
-      this.scene.stop();
-      this.scene.start("play", { savefile: "savefile02" });
+      this.startGame("savefile02");
     }
     if (
       Phaser.Input.Keyboard.JustDown(this.loadSaveFile03!) &&
       localStorage.getItem("savefile03")
     ) {
-      this.scene.stop();
-      this.scene.start("play", { savefile: "savefile03" });
+      this.startGame("savefile03");
     }
   }
-}
 
+  startGame(savefile: string) {
+    this.scene.stop();
+    this.scene.start("play", {
+      scenarioData: this.scenarioData,
+      savefile: savefile,
+    });
+  }
+}
 // function to convert yaml text file to json format
 function YAMLtoJSON(yamlStr: string) {
   var obj = YAML.parse(yamlStr);
