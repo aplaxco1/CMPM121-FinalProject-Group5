@@ -56,7 +56,7 @@ const cropOptions: CropOption[] = [
     sunLevel: 2,
     waterLevel: 3,
     canGrow(growthContext): boolean {
-      // for this particular crop, it can only grow if next to at least two other strawberries
+      // can only grow if next to at least two other strawberries
       let nearbyStrawberries = 0;
       for (let cell of growthContext.nearbyCells) {
         if (cell.crop != null && cell.crop.cropName == this.cropName) {
@@ -80,7 +80,19 @@ const cropOptions: CropOption[] = [
     sunLevel: 3,
     waterLevel: 4,
     canGrow(growthContext): boolean {
-      if (growthContext.nearbyCells) {
+      // can only grow if ONLY potatoes near it
+      let onlyPotatoes: boolean = true;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null && cell.crop.cropName != this.cropName) {
+          onlyPotatoes = false;
+          break;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        onlyPotatoes
+      ) {
         return true;
       } else {
         return false;
@@ -93,7 +105,19 @@ const cropOptions: CropOption[] = [
     sunLevel: 4,
     waterLevel: 2,
     canGrow(growthContext): boolean {
-      if (growthContext.nearbyCells) {
+      // can only grow if no plants nearby
+      let enoughSpace: boolean = true;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null) {
+          enoughSpace = false;
+          break;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        enoughSpace
+      ) {
         return true;
       } else {
         return false;
@@ -139,6 +163,7 @@ export default class Play extends Phaser.Scene {
 
   // current global conditions across all cells
   currentSunLevel?: number;
+  currCropIndex: number = 0;
   sleeping: boolean = false;
 
   numColumns?: number;
@@ -152,10 +177,8 @@ export default class Play extends Phaser.Scene {
   up?: Phaser.Input.Keyboard.Key;
   down?: Phaser.Input.Keyboard.Key;
   // for placing plants
-  //place?: Phaser.Input.Keyboard.Key;
-  placeCrop1?: Phaser.Input.Keyboard.Key;
-  placeCrop2?: Phaser.Input.Keyboard.Key;
-  placeCrop3?: Phaser.Input.Keyboard.Key;
+  placeCrop?: Phaser.Input.Keyboard.Key;
+  cycleCrop?: Phaser.Input.Keyboard.Key;
   // for collecting plants
   collect?: Phaser.Input.Keyboard.Key;
   // to progress turn
@@ -179,6 +202,7 @@ export default class Play extends Phaser.Scene {
   cropsText: any;
   winText?: Phaser.GameObjects.Text;
   controlsText?: Phaser.GameObjects.Text;
+  cropText?: Phaser.GameObjects.Text;
   statusText?: Phaser.GameObjects.Text;
 
   // determines which save file to load game from
@@ -288,9 +312,8 @@ export default class Play extends Phaser.Scene {
     this.up = this.#addKey("UP");
     this.down = this.#addKey("DOWN");
     this.movementInputs = [this.right, this.left, this.up, this.down];
-    this.placeCrop1 = this.#addKey("ONE");
-    this.placeCrop2 = this.#addKey("TWO");
-    this.placeCrop3 = this.#addKey("THREE");
+    this.placeCrop = this.#addKey("P");
+    this.cycleCrop = this.#addKey("C");
     this.collect = this.#addKey("H");
     this.restart = this.#addKey("SPACE");
     this.sleep = this.#addKey("S");
@@ -355,7 +378,16 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[1] - Plant Strawberry, [2] - Plant Potato, [3] Plant Corn\n[H] - Harvest\n[S] - Sleep (Progress Turn)\n[Z] - Undo\n[X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
+        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu\nCurrent Objective: Harvet 5 Starberries",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.cropText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 1.75,
+        "Current Crop Selected: ",
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
@@ -363,7 +395,7 @@ export default class Play extends Phaser.Scene {
     this.statusText = this.add
       .text(
         0,
-        (this.game.config.height as number) - uIBarHeight / 2,
+        (this.game.config.height as number) - uIBarHeight / 2.25,
         "Current Cell:\n",
         { color: "0x000000" },
       )
@@ -399,17 +431,19 @@ export default class Play extends Phaser.Scene {
       // simple player movement
       this.movePlayer();
 
+      this.cropText!.text =
+        "Current Crop Selected: " + cropOptions[this.currCropIndex].cropName;
       this.displayCurrentCellStatus();
       this.CropStatus();
 
-      if (Phaser.Input.Keyboard.JustDown(this.placeCrop1!)) {
-        this.plant(cropOptions[0]);
+      if (Phaser.Input.Keyboard.JustDown(this.placeCrop!)) {
+        this.plant(cropOptions[this.currCropIndex]);
       }
-      if (Phaser.Input.Keyboard.JustDown(this.placeCrop2!)) {
-        this.plant(cropOptions[1]);
-      }
-      if (Phaser.Input.Keyboard.JustDown(this.placeCrop3!)) {
-        this.plant(cropOptions[2]);
+      if (Phaser.Input.Keyboard.JustDown(this.cycleCrop!)) {
+        this.currCropIndex += 1;
+        if (this.currCropIndex >= cropOptions.length) {
+          this.currCropIndex = 0;
+        }
       }
 
       // collect a crop
