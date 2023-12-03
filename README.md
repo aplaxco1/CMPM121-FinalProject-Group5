@@ -300,3 +300,15 @@ In terms of team roles, we have mostly stuck to the adjustments that were made l
 engine lead addressing a few issues encountered by our tools alongside the tools lead, and the testing lead aand engine lead taking on primary responsibilities for writing and testing the majority of code. At
 this point, most of our roles are more or less settled, with some group members also taking on a few more responsibilities than they had been the last week to keep up with the new coding requirements and to
 address certain challenges that were faced.
+
+# Devlog Entry 04 - 12/04/2023
+
+## How We Satisfied the Software Requirements [F0 - F2]
+
+### [F0 - F1]
+
+### [F2.a] External DSL for Scenario Design
+
+### [F2.b] Internal DSL for Plants and Growth Conditions
+
+## Reflection
