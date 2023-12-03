@@ -1,9 +1,20 @@
+export interface CellContext {
+  cellWaterLevel: number;
+  crop: CropOption | null;
+}
+
+export interface GrowthContext {
+  globalSunLevel: number;
+  cellWaterLevel: number;
+  nearbyCells: CellContext[];
+}
+
 export interface CropOption {
   cropName: string;
-  growthRate: number;
+  maxGrowthLevel: number;
   sunLevel: number;
   waterLevel: number;
-  cropsToAvoid: string[];
+  canGrow(growthcontext: GrowthContext): boolean;
 }
 
 export class Crop extends Phaser.GameObjects.Sprite {
@@ -35,10 +46,6 @@ export class Crop extends Phaser.GameObjects.Sprite {
     return this.cropData!.cropName;
   }
 
-  getGrowthRate(): number {
-    return this.cropData!.growthRate;
-  }
-
   getnutrientsNeeded(): { sunLevel: number; waterLevel: number } {
     return {
       sunLevel: this.cropData!.sunLevel,
@@ -51,37 +58,15 @@ export class Crop extends Phaser.GameObjects.Sprite {
   }
 
   increaseGrowthLevel(): void {
-    const maxGrowthLevel = 6;
-
-    if (this.growthLevel >= maxGrowthLevel) {
-      this.growthLevel = maxGrowthLevel;
+    if (this.growthLevel >= this.cropData!.maxGrowthLevel) {
+      this.growthLevel = this.cropData!.maxGrowthLevel;
     } else {
       this.growthLevel++;
     }
   }
 
-  checkNutrients(sun: number, water: number, adjacentCrops: string[]): boolean {
-    let badCropsNearby: boolean = false;
-    for (const crop of this.cropData!.cropsToAvoid) {
-      for (const nearbyCrop of adjacentCrops) {
-        if (crop == nearbyCrop) {
-          badCropsNearby = true;
-        }
-      }
-    }
-    if (
-      sun >= this.cropData!.sunLevel &&
-      water >= this.cropData!.waterLevel &&
-      !badCropsNearby
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  grow(water: number, sun: number, adjacentCrops: string[]): void {
-    if (this.checkNutrients(sun, water, adjacentCrops)) {
+  grow(growthContext: GrowthContext): void {
+    if (this.cropData!.canGrow(growthContext)) {
       this.increaseGrowthLevel();
     }
     console.log(this.growthLevel);

@@ -1,7 +1,12 @@
 import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
 import { CommandManager, MoveCommand } from "../classes/Command.ts";
-import { Crop, CropOption } from "../classes/Crop.ts";
+import {
+  Crop,
+  CropOption,
+  GrowthContext,
+  CellContext,
+} from "../classes/Crop.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
@@ -47,24 +52,53 @@ interface CellData {
 const cropOptions: CropOption[] = [
   {
     cropName: "Strawberry",
-    growthRate: 5,
+    maxGrowthLevel: 6,
     sunLevel: 2,
     waterLevel: 3,
-    cropsToAvoid: ["Potato"],
+    canGrow(growthContext): boolean {
+      // for this particular crop, it can only grow if next to at least two other strawberries
+      let nearbyStrawberries = 0;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null && cell.crop.cropName == this.cropName) {
+          nearbyStrawberries += 1;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        nearbyStrawberries >= 2
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   {
     cropName: "Potato",
-    growthRate: 4,
+    maxGrowthLevel: 6,
     sunLevel: 3,
     waterLevel: 4,
-    cropsToAvoid: ["Corn"],
+    canGrow(growthContext): boolean {
+      if (growthContext.nearbyCells) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   {
     cropName: "Corn",
-    growthRate: 6,
+    maxGrowthLevel: 6,
     sunLevel: 4,
     waterLevel: 2,
-    cropsToAvoid: ["Strawberry", "Potato"],
+    canGrow(growthContext): boolean {
+      if (growthContext.nearbyCells) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
 ];
 
@@ -172,7 +206,7 @@ export default class Play extends Phaser.Scene {
         const cropInfo = {
           x: value.x,
           y: value.y,
-          cropOption: value.cropData,
+          cropOption: value.cropData!.cropName,
           cropLevel: value.getGrowthLevel(),
         };
         cropDataMap.set(key, cropInfo);
@@ -235,7 +269,7 @@ export default class Play extends Phaser.Scene {
         this,
         value.x,
         value.y,
-        value.cropOption,
+        cropOptions[this.findOption(value.cropOption)],
         value.cropLevel,
       )
         .setOrigin(0, 0)
@@ -671,14 +705,19 @@ export default class Play extends Phaser.Scene {
         const cell = JSON.parse(key);
         const cellWaterLevel = this.gridCells![cell.x][cell.y].waterLevel;
         // get list of crops near this one
-        const adjacentCrops = this.getAdjacentCrops(cell);
-        newCrop.grow(cellWaterLevel, this.currentSunLevel!, adjacentCrops);
+        const adjacentCells = this.getAdjacentCells(cell);
+        const growthContext: GrowthContext = {
+          globalSunLevel: this.currentSunLevel!,
+          cellWaterLevel: cellWaterLevel,
+          nearbyCells: adjacentCells,
+        };
+        newCrop.grow(growthContext);
       }
     });
   }
 
-  getAdjacentCrops(cell: CellData): string[] {
-    const adjacentCrops: string[] = [];
+  getAdjacentCells(cell: { x: number; y: number }): CellContext[] {
+    const adjacentCrops: CellContext[] = [];
     const nearbyCells = [
       { x: cell.x, y: cell.y - 1 },
       { x: cell.x, y: cell.y + 1 },
@@ -690,9 +729,18 @@ export default class Play extends Phaser.Scene {
       { x: cell.x + 1, y: cell.y + 1 },
     ];
     for (const c of nearbyCells) {
-      const crop = this.cropMap.get(JSON.stringify(c));
-      if (crop != null) {
-        adjacentCrops.push(crop.getPlantName());
+      if (
+        !(c.x < 0 || c.x >= this.numRows! || c.y < 0 || c.y >= this.numColumns!)
+      ) {
+        let cellContext: CellContext = {
+          cellWaterLevel: this.gridCells![c.x][c.y].waterLevel,
+          crop: null,
+        };
+        const crop = this.cropMap.get(JSON.stringify(c));
+        if (crop != null) {
+          cellContext.crop = crop.cropData!;
+        }
+        adjacentCrops.push(cellContext);
       }
     }
     return adjacentCrops;
@@ -736,13 +784,12 @@ export default class Play extends Phaser.Scene {
         ", Crop Level = " +
         currCrop.getGrowthLevel() +
         "\n";
-      if (
-        currCrop.checkNutrients(
-          this.currentSunLevel!,
-          this.gridCells![currCell!.x][currCell!.y].waterLevel,
-          this.getAdjacentCrops(this.gridCells![currCell!.x][currCell!.y]),
-        )
-      ) {
+      const canItGrow = currCrop.cropData!.canGrow({
+        globalSunLevel: this.currentSunLevel!,
+        cellWaterLevel: this.gridCells![currCell!.x][currCell!.y].waterLevel,
+        nearbyCells: this.getAdjacentCells(currCell!),
+      });
+      if (canItGrow) {
         this.statusText!.text += "Crop Can Grow!\n";
       } else {
         this.statusText!.text += "Crop Cannot Grow!\n";
@@ -754,12 +801,10 @@ export default class Play extends Phaser.Scene {
 
   CropStatus() {
     this.cropsText!.text = "Harvest result: ";
-    this.cropsText!.text += "Strawberry ";
-    this.cropsText!.text += this.collectedCrops.get("Strawberry");
-    this.cropsText!.text += " Potato ";
-    this.cropsText!.text += this.collectedCrops.get("Potato");
-    this.cropsText!.text += " Corn ";
-    this.cropsText!.text += this.collectedCrops.get("Corn");
+    for (let crop of cropOptions) {
+      this.cropsText!.text += crop.cropName + " ";
+      this.cropsText!.text += this.collectedCrops.get(crop.cropName) + ", ";
+    }
   }
 }
 
