@@ -1,4 +1,6 @@
 import * as Phaser from "phaser";
+import YAML from "yamljs";
+import detailsURL from "/assets/details.yml?url";
 
 export default class Menu extends Phaser.Scene {
   title?: Phaser.GameObjects.Text;
@@ -12,6 +14,10 @@ export default class Menu extends Phaser.Scene {
     super("menu");
   }
 
+  preload() {
+    this.load.text("details", detailsURL);
+  }
+
   #addKey(
     name: keyof typeof Phaser.Input.Keyboard.KeyCodes,
   ): Phaser.Input.Keyboard.Key {
@@ -20,6 +26,11 @@ export default class Menu extends Phaser.Scene {
 
   create() {
     //localStorage.clear();
+
+    // testing stuff for external dsl
+    const details = this.cache.text.get("details");
+    const result_json = YAMLtoJSON(details);
+    console.log(result_json);
 
     const menuConfig = {
       align: "center",
@@ -97,4 +108,11 @@ export default class Menu extends Phaser.Scene {
       this.scene.start("play", { savefile: "savefile03" });
     }
   }
+}
+
+// function to convert yaml text file to json format
+function YAMLtoJSON(yamlStr: string) {
+  var obj = YAML.parse(yamlStr);
+  var jsonStr = JSON.stringify(obj);
+  return jsonStr;
 }

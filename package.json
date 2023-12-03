@@ -37,5 +37,8 @@
       ]
     }
   },
-  "prettier": {}
+  "prettier": {},
+  "dependencies": {
+    "yamljs": "^0.3.0"
+  }
 }
