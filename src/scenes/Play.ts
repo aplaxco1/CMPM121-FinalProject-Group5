@@ -924,7 +924,8 @@ export default class Play extends Phaser.Scene {
 
   displayInventory() {
     this.inventoryText!.text = "Harvest Result: ";
-    for (let crop of cropOptions) {
+    for (let cropIndex of this.possibleCropIndicies) {
+      const crop = cropOptions[cropIndex];
       this.inventoryText!.text += crop.cropName + " ";
       this.inventoryText!.text += this.collectedCrops.get(crop.cropName) + ", ";
     }
