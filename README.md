@@ -307,8 +307,63 @@ address certain challenges that were faced.
 
 ### [F0 - F1]
 
+In terms of all of the previous requirements for previous weeks, only a few very minor changes have been made, mostly to accomidate for the new changes added for F2, but also a couple simply to fix bugs that
+went unnoticed the first time around. For one, we altered the way that the program checks if crops have reached their maximum growth. Previously, we simply checked if the max growth level was 6 each time that we harvested a crop, on account of the fact that all three of the crops we implemented so far all have a maximum growth level of 6, but we changed this implementation so that it was no longer a hard-coded value.
+Now, each crop type has an additional variable, that describes their maximum level of growth, so that, when plants are grown or harvested, the program checks those values of the specific crop type instead of using the hardcoded 6 value. We did this in preperation for the new requirements, so that crops could be added to the game that might have a maximum growth level that is different from the ones already
+implemented. The rest of the minor changes will be described in relation to how code was refactored in order to accomidate for the internal and external DSL requirements for this next assignment.
+
 ### [F2.a] External DSL for Scenario Design
 
 ### [F2.b] Internal DSL for Plants and Growth Conditions
+
+The way that our crops were already implemented, in a JSON-like format which described the structure that each crop type must have, was already fairly similar to how an internal DSL operates, so we only really
+made a few small changes in order to make it possible for any new type of plant to be added to the game without it resulting in any errors. To do this, we, for one, altered the structure of these crop types, so
+that they could have their own defined spatial conditions in order to grow, and were not constrained by the structure of the Crop class itself which implements each of these crop types. Now, each crop type, in
+addition to their previously utilized values and the ones added for this particular requirement, now includes a canGrow() method, which determines if the conditions of game grid and its weather conditons match
+what is required of the specific crop type, and can be implemented in any way that the crop type so desires. This canGrow() method takes in a "GridContext" object, which oulines the current global sun level,
+the water level of the particular cell that the crop type resides within, and the state of all the cells that lie next to this crop, including their own individual water levels and the crops that may or may
+not lie within them. In order to accomodate for this change in structure, we had to change the Crop class a bit, so it would instead call the crop type's canGrow() method to check wether or not they can grow, as
+well as changing the types of values that are passed from the game into each of the crops that exist within the game. Now, in addition to passing in the sun and water levels as it did prior, it also
+generates a list of all the cells near its current cell, including both their water levels and the type of crop that resides within it. This mean that, when a new crop type is added, it can utilize this data to
+determine its particular growth conditions. A GrowthContext and CellContext interface was added in accordance to these two new types of data that are passed betwen the game state and the crop type. An example of what this internal DSL used for creating a new crop type might look like can be seen below:
+
+``` typescript
+// TypeScript is the programming language being utilized for this internal DSL
+
+let newCrop: CropOption = {
+    cropName: "Wheat",
+    maxGrowthLevel: 4,
+    sunLevel: 5,
+    waterLevel: 3,
+    canGrow(growthContext): boolean {
+        // This crop only grows if all of the cells near it have the right moisture levels
+        let moistureLevels = true;
+        for (let cell of growthContext.nearbyCells) {
+            if (cell.cellWaterLevel < this.waterLevel) {
+                moistureLevels = false;
+                break;
+            }
+        }
+        if (growthContext.cellSunLevel >= this.sunLevel && growthContext.cellWaterLevel >= this.waterLevel && moistureLevels) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+}
+```
+
+The above code deomstrates what it would look like to use our internal DSL in order to define a new crop type that our game might utilize. (Note: This of course, will only show up as an option within the game
+if, for the current gameplay scenario read in from the external DSL described prior, it is included in the list of available crops of course.). If this crop os then pushed onto the array of all crop options
+utilized within the game, the player will be able to select it as an option for them to plant within the game, and it will operate according to the canGrow() method defined within the DSL. For the structure of
+this DSL, the cropName describes the name of the particular type of crop, the maxGrowth level defines the highest level of growth that the crop can reach when its spatial conditions are properly met, the s
+sunLevel defined the minimum level of sun needed for the crop to grow, the waterLevel describes the minimum water level of the particular location that the crop is planted at that it needs to grow, and the
+canGrow() method is defined in TyepScript code in order to determine if, given teh current state of the game, its conditions to grow are met or not and it will be able to grow to the next level when the player
+progresses their turn. In the canGrow() method, a growthContext is passed in, which provided the function with the necessary information about the game state it needs, including the game's current global sun
+level, the water level of the specific cell that the player is within, and the state of all the cells surrounding the one that the crop is in, including their individual water levels, and the name of the crops
+in those cells, if they exist. With all of this information provided by the internal DSL, the game will readily implement this as a new crop to use in the game, at least functionally. The only difference here
+is that, because our game utilizes sprite to represent crops, if the crop type doesn't have a sprite drawn, the game will default to another crop sprite that does not change according to its growth level. If
+a sprite for this crop were added, with is associated crop name, it would add the sprite in properly as wwll without any additional changes.
 
 ## Reflection
