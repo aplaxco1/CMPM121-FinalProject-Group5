@@ -314,9 +314,49 @@ implemented. The rest of the minor changes will be described in relation to how 
 
 ### [F2.a] External DSL for Scenario Design
 
+For our external DSL, we utilized the prexisting YAML text-file format in order to define the various scenarios present within our game scene. Within this external DSL, utilizing the recognized YAML text format
+new gameplay scenarios can be defined, inclduing the name of the particular scenario (ex: Tutorial, RainySeason, DrySeason, etc), a list of availble crops (of the crops implemented within the game of course) that the player might grow during that particular gameplay stage, the particular win conditions of the gameplay scenario (how many of each crop that they need to grow), the human readable instructions which
+will be displayed on the screen so the player knows their current objective, and optionally, the sun and rain probabilities, which can be adjusted to alter the rate at which the sun levels or water levels are
+at their highest. Within the game, in order to gather the information of this external DSL, the game reads in the external .yml file's text, converts each of the scenario entries into a JSON format more
+easily interperetable for the TypeScript language, and then passes that information to the play scene so that it knows the sequence of scenarios for the player to play through. In order to do this, the
+existing gameplay structure had to be refactored a bit. We had to create a list of win conditions, for each gameplay scenario, and save the current index of which gameplay scenario the player had reached
+within the sava data of the game so that the game could be loaded in at the correct scenario. We also had to implement methods to check the current win condition and progress to the next gameplay scenario.
+In the check win conditions method, it iterates through the list of win conditions, and checks if the player has the corresponding number of that particular crop in their inventory. If the player matches the
+specific win conditions of the scenario, the game progresses to the next scenario, clears the grid and the players inventory, but if there is not next gameplay scenario in the list, ends the game and prompts
+the [layer to restart. The way that the random sun and water levels work were adjusted slightly as well. Now there is a propbability that a day will be sunny, the probability which is determined by the
+scenario read in from the external DSL, and then will generate higher random levels of sun, where the probability of rain was simply changed to account for whatever was given by the current gameplay scenario.
+Each time tha player meets the win conditions of a scenario dteremined by the extrnal DSL, it progresses to the next index in the scenarios list and reads in all the information for that particular 
+gameplay scenario, as determined by the external "scenarios.yml" file converted into JSON format and then parsed into a data object.
+
+An example of what a possible new gameplay scenario as defined by our extermal YAML-based DSL can be seen below:
+
+````yaml
+- scenario: sunny
+  available_crops:
+    - Strawberry
+    - Potato
+    - Corn
+  win_conditions:
+    - [Strawberry, 10]
+    - [Potato, 5]
+    - [Corn, 5]
+  sun_probability: 0.85
+  rain_probability: 0.25
+  human_instructions: "Harvest 10 Strawberries, 5 Potatoes, and 5 Corn"
+````
+
+In the example shown above, it demonstrates how a new scenario could be added to the game using the external DSL. If this were added to the "scenarios.yml" file in our assets folder, ths game would consider this
+as a third gameplay scenario for the player to play through, and would alter the relevant variables in accordance to the information detailed here in text file. In this instance, a "-" mark is used to decsribe
+this scenario as a new addition to the sequence of scenarios, so that the game knows to add it to a list of scenarios to reference as the player plays the game. The "available_crops" section provided a list of
+all the crops out of the implemented crops that the player is allowed to utilize within the game and so, in this scenario, the same would limit the players choices of crops to cycle through and plant on the grid
+to "Strawberry", "Potato", and "Corn". The "win_conditions" section oulines all of the crops and their totals that the player must harvest in order to finish this particular scenario, so in this case, the player
+would have to grow at least 10 strawberries, 5 potatoes, and 5 corn. The "sun_probability" and "rain_probability" and optional additions that can be added, which determine the rate at which the game's weather
+conditions will be sunny and rainy each turn within the gaame for this particular scenario. Lastly, "human_instructions" outlines the text that the player will be able to see in order to help guide them to
+completing the win conditions for this stage of gameplay.
+
 ### [F2.b] Internal DSL for Plants and Growth Conditions
 
-The way that our crops were already implemented, in a JSON-like format which described the structure that each crop type must have, was already fairly similar to how an internal DSL operates, so we only really
+The way that our crops were already implemented, in a JSON-like format which described the structure that each crop type must have, was already fairly similar to how an internal typescript DSL operates, so we only really
 made a few small changes in order to make it possible for any new type of plant to be added to the game without it resulting in any errors. To do this, we, for one, altered the structure of these crop types, so
 that they could have their own defined spatial conditions in order to grow, and were not constrained by the structure of the Crop class itself which implements each of these crop types. Now, each crop type, in
 addition to their previously utilized values and the ones added for this particular requirement, now includes a canGrow() method, which determines if the conditions of game grid and its weather conditons match
@@ -325,7 +365,13 @@ the water level of the particular cell that the crop type resides within, and th
 not lie within them. In order to accomodate for this change in structure, we had to change the Crop class a bit, so it would instead call the crop type's canGrow() method to check wether or not they can grow, as
 well as changing the types of values that are passed from the game into each of the crops that exist within the game. Now, in addition to passing in the sun and water levels as it did prior, it also
 generates a list of all the cells near its current cell, including both their water levels and the type of crop that resides within it. This mean that, when a new crop type is added, it can utilize this data to
-determine its particular growth conditions. A GrowthContext and CellContext interface was added in accordance to these two new types of data that are passed betwen the game state and the crop type. An example of what this internal DSL used for creating a new crop type might look like can be seen below:
+determine its particular growth conditions. Because of the nature of this DSL, this reffering to how the logic of whether or not certain crop type has the ability to grow in its current conditions must be 
+implemented within the DSL structure of the plant itself, and it it requires the current state of the game to be passed into it in order to check this conditions, it would be quite difficult for this DSL to
+be external rather than internal. In this sense, it is necessary for this DSL to be internal so that it may utilize the structures of the programming language to implement the conditional logic to determine
+wether or not a crop has the ability to grow, as well as be able to access the current internal information present within the game scene, so that the "GrowthContext" can be gathered from the scene and
+then passed into the DSL in order to check if the particular crop's conditions are met.
+
+An example of what this internal DSL used for creating a new crop type might look like can be seen below:
 
 ``` typescript
 // TypeScript is the programming language being utilized for this internal DSL
