@@ -453,6 +453,16 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
+      this.farmName = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 8,
+        "Current Crops:\n",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+
     // create player
     this.player = new Player(
       this,
