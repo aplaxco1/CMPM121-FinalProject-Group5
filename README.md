@@ -309,8 +309,11 @@ address certain challenges that were faced.
 
 In terms of all of the previous requirements for previous weeks, only a few very minor changes have been made, mostly to accomidate for the new changes added for F2, but also a couple simply to fix bugs that
 went unnoticed the first time around. For one, we altered the way that the program checks if crops have reached their maximum growth. Previously, we simply checked if the max growth level was 6 each time that we harvested a crop, on account of the fact that all three of the crops we implemented so far all have a maximum growth level of 6, but we changed this implementation so that it was no longer a hard-coded value.
-Now, each crop type has an additional variable, that describes their maximum level of growth, so that, when plants are grown or harvested, the program checks those values of the specific crop type instead of using the hardcoded 6 value. We did this in preperation for the new requirements, so that crops could be added to the game that might have a maximum growth level that is different from the ones already
-implemented. The rest of the minor changes will be described in relation to how code was refactored in order to accomidate for the internal and external DSL requirements for this next assignment.
+Now, each crop type has an additional variable, that describes their maximum level of growth, so that, when plants are grown or harvested, the program checks those values of the specific crop type instead of using the hardcoded 6 value. In addition to this, we also changed the way that we went about allowing players to plant specific crops on the grid. Originally, each of the three crop types were assigned to a 
+keyboard button, but to make this system more generic, so that even in the chance that there were more than the original list of crops, all of those different crop options would be utilized within the game. In
+order to do so, we instead implemented a global selected crop, where the player could press a keyboard button in order to cycle through the list of available crops and then press an alternative keyboard
+button in order to actually plant that crop on the grid. This makes it so that, if more crop options are added, the game will also cycle through each of those added crops and allow for the player to plant
+them, rather then hard coding in particular keys for each crop. We did all of this in preperation for the new requirements, so that crops could be added to the game that might have a maximum growth level that is different from the ones already implemented. The rest of the minor changes will be described in relation to how code was refactored in order to accomidate for the internal and external DSL requirements for this next assignment.
 
 ### [F2.a] External DSL for Scenario Design
 
@@ -413,3 +416,32 @@ is that, because our game utilizes sprite to represent crops, if the crop type d
 a sprite for this crop were added, with is associated crop name, it would add the sprite in properly as wwll without any additional changes.
 
 ## Reflection
+
+In implementing each of the new requirements for this stage of the project, these including the usage of an external DSL to outline specifics about each gameplay scenario and the internal DSL for defining new 
+crop types, we ended up having to restructure and rethink quite a few different aspects of the game, which made refactoring a bit difficult this time around. While the implementation of our internal DSL didn't
+require all to many changes, as we had already implemented a few baseline aspects of this internal DSL with the very first iteration of our project, the external DSL required us to change around many of the 
+placeholder hard-coded values of our game that we had in place while working on other aspects of the game, and therefore alter many of teh underlying structures that allowed for the game to progress. This meant
+that we had to alter the way that maximum crop levels were checked and how players would select the specific type of crop that they wanted to plant, as was described under the [F0 - F1] section above, but we 
+also had to change many game state variables, such as the win conditions, the probablities for sun and rain to occur on each turn, the crops that the player was able to plant in the game at a given time for the
+extrernal DSL implementation, as well as change the way that the grid state was passed into each crop object to check to see if they would grow through new object structures ("GridContext" and "CellContext"),
+how information about each cell surrounding a particular crop were gathered, and how the crop class itself would check to see if certain conditionals were met based on the particular crop's implementation
+of its canGrow() method rather than a standard method across all crop types for the internal DSL. Each of these changes to structure required for us to alter many different sections of our code, which made
+refactoring a bit more difficult that usual, as wel realized just how many sections of code we had not properly generalized when we started this project. We had to reconsider our game's structure quite a bit
+throughout this whole processm as having to dicover all the parts of code that needed to be changed or added in reponse to these changes was a bit overwhelming and hard to manage. Hopefully however, now that
+these requirements made us think about making our code more generalized and available for easy alteration, this will make it easier to implement future additions to our project.
+
+One persistent challenge we faced for this particular set of requirements involved integrating them into last week's requirements, especially in regards to the save system. Prior, for each crop on the grid, when
+the game was saved, it would simply save all of the data associated with the particular crop type to the save file, but because of the way that we implemented our DSL, each crop type also has their own specific
+method of determining wether or not they are able to grow. When these methods are made into strings for the save file, and then loaded back in, they could no longer be recognized as methods to be utilized to
+check if the crops were able to grow, having been distorted in the process of being wriiten as strings and then read back into the game as strings. To fix this, we had to instead pass in the particular name of
+the crops on the grid to the save file, so that when the game was loaded, it would check for the name of that crop in our list of all implemented crop types, and then create a new crop at its previous position
+using the crop type found within the corresponding crop name read in from the save file. implementing our external DSL with our save system was much easier on the other hand, as the scenario text file could be
+easily re-read into the scene upon loading from a save file, and the only extra information that the game needed to know was which scenario in the sequence of game scenarios that the player was currently on,
+and then simply load in the correct information for the particular index of the current scenario.
+
+Beyond some challenges that we encountered within our code while implementing each of these requirements, some changes in our team structure mostly just included our engine lead taking on some responsibilities
+of our tool lead once again when looking for a way to implement the external DSL structure. As the engine lead, alongside the teatsing lead, have been the two primary programmers for this project, this means
+that, when implementing these new requirements they often do much of the reasearch on the specific tools they might need in order to program them into the game, rather than having the tools lead do it, as they
+are more distances from the majority of the code within the game and thus it would be a bit less convienet if they were charged with researching teh specific tools needed for the two programmers to utilize. This
+means that, when working on the external DSL, the engine lead was the one who researched the external modules used in order to integrate .yml files for the project, and discovered a way to utilize the "ymljs" 
+module through Node.js in order to convert the text real in from ".yml" files into a JSON format that would then be parsed into a data structure that the program could utilize to set up each scenario in the game.
