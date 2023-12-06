@@ -398,6 +398,9 @@ export default class Play extends Phaser.Scene {
     // draw UI bar
     this.initializeText();
 
+    
+
+
     // create player
     this.player = new Player(
       this,
