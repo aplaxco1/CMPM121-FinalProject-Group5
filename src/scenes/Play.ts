@@ -363,9 +363,6 @@ export default class Play extends Phaser.Scene {
     // draw UI bar
     this.initializeText();
 
-    // set up all interactive buttons
-    this.setUpInteractiveButtons();
-
     // create player
     this.player = new Player(
       this,
@@ -376,6 +373,9 @@ export default class Play extends Phaser.Scene {
       gridCellHeight,
     ).setOrigin(0.5, 0.5);
     this.player.setCollideWorldBounds(true);
+
+    // set up all interactive buttons
+    this.setUpInteractiveButtons();
   }
 
   update() {
@@ -400,10 +400,7 @@ export default class Play extends Phaser.Scene {
         this.plant(cropOptions[this.currCropIndex]);
       }
       if (Phaser.Input.Keyboard.JustDown(this.cycleCrop!)) {
-        this.currCropIndex += 1;
-        if (this.currCropIndex >= this.possibleCropIndicies.length) {
-          this.currCropIndex = 0;
-        }
+        this.changeSelectedCrop();
       }
 
       // collect a crop
@@ -413,13 +410,7 @@ export default class Play extends Phaser.Scene {
 
       // progress turn
       if (Phaser.Input.Keyboard.JustDown(this.sleep!)) {
-        this.sleeping = true;
-        this.player!.stopMoving();
-        this.cameras.main.fadeOut(1000);
-        this.updateSun();
-
-        this.time.delayedCall(1000, this.fadeIn, [], this);
-        this.time.delayedCall(2000, this.playerWake, [], this);
+        this.playerSleep();
       }
 
       // save game
@@ -439,10 +430,7 @@ export default class Play extends Phaser.Scene {
       // return to menu
       if (Phaser.Input.Keyboard.JustDown(this.return!)) {
         // clear all buttons before returning to menu
-        const buttonContainer = document.getElementById("ButtonContainer");
-        buttonContainer!.innerHTML = "";
-        this.scene.stop();
-        this.scene.start("menu");
+        this.returnToMenu();
       }
 
       if (Phaser.Input.Keyboard.JustDown(this.undo!)) {
@@ -633,6 +621,13 @@ export default class Play extends Phaser.Scene {
     return 0;
   }
 
+  changeSelectedCrop() {
+    this.currCropIndex += 1;
+    if (this.currCropIndex >= this.possibleCropIndicies.length) {
+      this.currCropIndex = 0;
+    }
+  }
+
   plant(crop: CropOption) {
     const pos =
       this.gridCells![this.player!.currCell!.x][this.player!.currCell!.y];
@@ -687,15 +682,32 @@ export default class Play extends Phaser.Scene {
     }
   }
 
+  playerSleep() {
+    this.sleeping = true;
+    this.player!.stopMoving();
+    this.cameras.main.fadeOut(1000);
+
+    this.time.delayedCall(1000, this.fadeIn, [], this);
+    this.time.delayedCall(2000, this.playerWake, [], this);
+  }
+
   fadeIn() {
     this.cameras.main.fadeIn(1000);
   }
   playerWake() {
     this.growPlants();
     this.randomizeConditions();
+    this.updateSun();
     this.sleeping = false;
     // autosave after every turn
     this.saveGame("autosave");
+  }
+
+  returnToMenu() {
+    const buttonContainer = document.getElementById("ButtonContainer");
+    buttonContainer!.innerHTML = "";
+    this.scene.stop();
+    this.scene.start("menu");
   }
 
   initializeGrid() {
@@ -807,10 +819,85 @@ export default class Play extends Phaser.Scene {
   }
 
   setUpInteractiveButtons() {
-    // buttons for: moving (4), cycle through crops, plant crops, harvest crops, sleep
+    // buttons for: sleep
     // undo, redo, save1, save2, save3, return to menu
     const buttonContainer = document.getElementById("ButtonContainer");
+
     this.setUpMovementButtons(buttonContainer!);
+
+    const cycleCropButton = document.createElement("button");
+    cycleCropButton.innerHTML = cropOptions[this.currCropIndex].cropName;
+    cycleCropButton.addEventListener("click", () => {
+      this.changeSelectedCrop();
+      cycleCropButton.innerHTML = cropOptions[this.currCropIndex].cropName;
+    });
+    buttonContainer!.append(cycleCropButton);
+
+    let buttons = [
+      {
+        text: "Plant",
+        action: () => {
+          this.plant(cropOptions[this.currCropIndex]);
+        },
+      },
+      {
+        text: "Harvest",
+        action: () => {
+          this.harvest();
+        },
+      },
+      {
+        text: "Sleep",
+        action: () => {
+          this.playerSleep();
+        },
+      },
+      {
+        text: "Undo",
+        action: () => {
+          this.undoCommand();
+        },
+      },
+      {
+        text: "Redo",
+        action: () => {
+          this.redoCommand();
+        },
+      },
+      {
+        text: "Return To Menu",
+        action: () => {
+          this.returnToMenu();
+        },
+      },
+      {
+        text: "Save 1",
+        action: () => {
+          this.saveGame("savefile01");
+        },
+      },
+      {
+        text: "Save 2",
+        action: () => {
+          this.saveGame("savefile02");
+        },
+      },
+      {
+        text: "Save 3",
+        action: () => {
+          this.saveGame("savefile03");
+        },
+      },
+    ];
+
+    for (let b of buttons) {
+      const button = document.createElement("button");
+      button.innerHTML = b.text;
+      button.addEventListener("click", () => {
+        b.action();
+      });
+      buttonContainer!.append(button);
+    }
   }
 
   setUpMovementButtons(buttonContainer: HTMLElement) {
