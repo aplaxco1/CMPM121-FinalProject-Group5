@@ -10,7 +10,7 @@ import {
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
-const uIBarHeight: number = 300;
+const uIBarHeight: number = 240;
 const suncolor = [0x34b070, 0x6f95b8, 0x785871, 0xb37050, 0xf7a53b, 0xffd134];
 
 class Cell {
@@ -126,7 +126,7 @@ const cropOptions: CropOption[] = [
   },
 ];
 
-interface command {
+interface Command {
   type: string; // either plant or harvest
   key: string;
   x: number;
@@ -158,8 +158,8 @@ export default class Play extends Phaser.Scene {
   collectedCrops: Map<string, number> = new Map(); // to check win condition
 
   // Command Manager
-  commandList: command[] = [];
-  redoList: command[] = [];
+  commandList: Command[] = [];
+  redoList: Command[] = [];
 
   // current global conditions across all cells
   currentSunLevel?: number;
@@ -396,62 +396,7 @@ export default class Play extends Phaser.Scene {
     this.allScenariosCompleted = false;
 
     // draw UI bar
-    this.add
-      .rectangle(
-        0,
-        (this.game.config.height as number) - uIBarHeight,
-        this.game.config.width as number,
-        uIBarHeight,
-        0xffffff,
-      )
-      .setOrigin(0, 0);
-
-    // add controls text to UI bar (temporary)
-    this.controlsText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu",
-        { color: "0x000000" },
-      )
-      .setOrigin(0, 0);
-
-    this.objectiveText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 1.5,
-        "CurrentObjective: " +
-          this.scenarioData![this.currScenarioIndex].human_instructions,
-        { color: "0x000000" },
-      )
-      .setOrigin(0, 0);
-
-    this.cropText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 1.75,
-        "Current Crop Selected: ",
-        { color: "0x000000" },
-      )
-      .setOrigin(0, 0);
-
-    this.statusText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 2.25,
-        "Current Cell:\n",
-        { color: "0x000000" },
-      )
-      .setOrigin(0, 0);
-
-    this.inventoryText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 6,
-        "Current Crops:\n",
-        { color: "0x000000" },
-      )
-      .setOrigin(0, 0);
+    this.initializeText();
 
     // create player
     this.player = new Player(
@@ -617,7 +562,7 @@ export default class Play extends Phaser.Scene {
   }
 
   undoCommand() {
-    let currCommand: command | undefined = this.commandList.pop();
+    let currCommand: Command | undefined = this.commandList.pop();
     if (currCommand != undefined) {
       // if it was a plant command, remove the plant
       if (currCommand.type == "plant") {
@@ -665,7 +610,7 @@ export default class Play extends Phaser.Scene {
   }
 
   redoCommand() {
-    let currCommand: command | undefined = this.redoList.pop();
+    let currCommand: Command | undefined = this.redoList.pop();
     if (currCommand != undefined) {
       this.commandList.push(currCommand);
       if (currCommand.type == "plant") {
@@ -888,6 +833,65 @@ export default class Play extends Phaser.Scene {
         }
       }
     }
+  }
+
+  initializeText() {
+    this.add
+      .rectangle(
+        0,
+        (this.game.config.height as number) - uIBarHeight,
+        this.game.config.width as number,
+        uIBarHeight,
+        0xf5f5f5,
+      )
+      .setOrigin(0, 0);
+
+    // add controls text to UI bar (temporary)
+    this.controlsText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight,
+        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.objectiveText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 1.65,
+        "CurrentObjective: " +
+          this.scenarioData![this.currScenarioIndex].human_instructions,
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.cropText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 2,
+        "Current Crop Selected: ",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.statusText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 2.5,
+        "Current Cell:\n",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
+
+    this.inventoryText = this.add
+      .text(
+        0,
+        (this.game.config.height as number) - uIBarHeight / 10,
+        "Current Crops:\n",
+        { color: "0x000000" },
+      )
+      .setOrigin(0, 0);
   }
 
   displayCurrentCellStatus() {
