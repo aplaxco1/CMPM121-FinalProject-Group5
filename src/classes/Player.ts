@@ -68,4 +68,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVelocityY(0);
     this.anims.play("idle_" + this.lastKnownDirection, true);
   }
+
+  moveNextCell(x: number, y: number, dir: string) {
+    this.x = x + this.cellWidth! / 2;
+    this.y = y + this.cellHeight! / 2;
+    this.lastKnownDirection = dir;
+    this.anims.play("idle_" + this.lastKnownDirection, true);
+  }
 }

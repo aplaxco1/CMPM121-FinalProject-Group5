@@ -29,12 +29,3 @@ document.body.appendChild(document.createElement("br"));
 const buttonContainer = document.createElement("div");
 buttonContainer.id = "ButtonContainer";
 document.body.appendChild(buttonContainer);
-
-const button = document.createElement("button");
-button.innerHTML = "this is a button";
-button.addEventListener("click", () => {
-  console.log("the button was clicked!");
-});
-
-const buttonH = document.getElementById("ButtonContainer");
-buttonH?.appendChild(button);

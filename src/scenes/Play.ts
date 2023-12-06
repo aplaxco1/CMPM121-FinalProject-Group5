@@ -7,47 +7,12 @@ import {
   GrowthContext,
   CellContext,
 } from "../classes/Crop.ts";
+import { Cell, CellData } from "../classes/Cell.ts";
 
 const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 240;
 const suncolor = [0x34b070, 0x6f95b8, 0x785871, 0xb37050, 0xf7a53b, 0xffd134];
-
-class Cell {
-  static readonly numBytes = 4 + 4 + 4;
-
-  constructor(private dataView: DataView) {}
-
-  get x(): number {
-    return this.dataView.getUint32(0);
-  }
-
-  set x(i: number) {
-    this.dataView.setUint32(0, i);
-  }
-
-  get y(): number {
-    return this.dataView.getUint32(4);
-  }
-
-  set y(i: number) {
-    this.dataView.setUint32(4, i);
-  }
-
-  get waterLevel(): number {
-    return this.dataView.getUint32(8);
-  }
-
-  set waterLevel(i: number) {
-    this.dataView.setUint32(8, i);
-  }
-}
-
-interface CellData {
-  x: number;
-  y: number;
-  waterLevel: number;
-}
 
 const cropOptions: CropOption[] = [
   {
@@ -398,8 +363,8 @@ export default class Play extends Phaser.Scene {
     // draw UI bar
     this.initializeText();
 
-    
-
+    // set up all interactive buttons
+    this.setUpInteractiveButtons();
 
     // create player
     this.player = new Player(
@@ -835,6 +800,45 @@ export default class Play extends Phaser.Scene {
           cell.waterLevel -= 1;
         }
       }
+    }
+  }
+
+  setUpInteractiveButtons() {
+    // buttons for: moving (4), cycle through crops, plant crops, harvest crops, sleep
+    // undo, redo, save1, save2, save3, return to menu
+    const buttonContainer = document.getElementById("ButtonContainer");
+    this.setUpMovementButtons(buttonContainer!);
+  }
+
+  setUpMovementButtons(buttonContainer: HTMLElement) {
+    let buttons = [
+      { text: "↑", dir: "up", x: 0, y: -1 },
+      { text: "→", dir: "right", x: 1, y: 0 },
+      { text: "↓", dir: "down", x: 0, y: 1 },
+      { text: "←", dir: "left", x: -1, y: 0 },
+    ];
+
+    for (let b of buttons) {
+      const button = document.createElement("button");
+      button.innerHTML = b.text;
+      button.addEventListener("click", () => {
+        let cell = this.player!.currCell!;
+        if (
+          cell.x + b.x < this.numRows! &&
+          cell.x + b.x >= 0 &&
+          cell.y + b.y < this.numColumns! &&
+          cell.y + b.y >= 0
+        ) {
+          cell.x += b.x;
+          cell.y += b.y;
+          this.player!.moveNextCell(
+            this.gridCells![cell.x][cell.y].x,
+            this.gridCells![cell.x][cell.y].y,
+            b.dir,
+          );
+        }
+      });
+      buttonContainer.append(button);
     }
   }
 
