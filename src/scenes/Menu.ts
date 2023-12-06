@@ -83,6 +83,8 @@ export default class Menu extends Phaser.Scene {
     this.loadSaveFile01 = this.#addKey("ONE");
     this.loadSaveFile02 = this.#addKey("TWO");
     this.loadSaveFile03 = this.#addKey("THREE");
+
+    this.setUpInteractiveButtons();
   }
 
   update() {
@@ -116,13 +118,36 @@ export default class Menu extends Phaser.Scene {
   }
 
   startGame(savefile: string) {
+    // clear all buttons before returning to menu
+    const buttonContainer = document.getElementById("ButtonContainer");
+    buttonContainer!.innerHTML = "";
     this.scene.stop();
     this.scene.start("play", {
       scenarioData: this.scenarioData,
       savefile: savefile,
     });
   }
+
+  setUpInteractiveButtons() {
+    const buttonContainer = document.getElementById("ButtonContainer");
+    const startGameButtons = [
+      { text: "Start New Game", savefile: "newgame" },
+      { text: "Continue From Last Save", savefile: "autosave" },
+      { text: "Load Save 1", savefile: "savefile01" },
+      { text: "Load Save 2", savefile: "savefile02" },
+      { text: "Load Save 3", savefile: "savefile03" },
+    ];
+    for (const b of startGameButtons) {
+      const startButton = document.createElement("button");
+      startButton.innerHTML = b.text;
+      startButton.addEventListener("click", () => {
+        this.startGame(b.savefile);
+      });
+      buttonContainer!.append(startButton);
+    }
+  }
 }
+
 // function to convert yaml text file to json format
 function YAMLtoJSON(yamlStr: string) {
   var obj = YAML.parse(yamlStr);

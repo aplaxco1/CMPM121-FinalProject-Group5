@@ -438,6 +438,9 @@ export default class Play extends Phaser.Scene {
 
       // return to menu
       if (Phaser.Input.Keyboard.JustDown(this.return!)) {
+        // clear all buttons before returning to menu
+        const buttonContainer = document.getElementById("ButtonContainer");
+        buttonContainer!.innerHTML = "";
         this.scene.stop();
         this.scene.start("menu");
       }
