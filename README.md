@@ -445,3 +445,20 @@ that, when implementing these new requirements they often do much of the reasear
 are more distances from the majority of the code within the game and thus it would be a bit less convienet if they were charged with researching teh specific tools needed for the two programmers to utilize. This
 means that, when working on the external DSL, the engine lead was the one who researched the external modules used in order to integrate .yml files for the project, and discovered a way to utilize the "ymljs" 
 module through Node.js in order to convert the text real in from ".yml" files into a JSON format that would then be parsed into a data structure that the program could utilize to set up each scenario in the game.
+
+# Devlog Entry 05 - 12/08/2023
+
+## How We Statsfied Software Requirements [F0 - F3]
+
+### [F0 - F2]
+
+### Internationalization
+
+### Localization
+
+### Mobile Installation
+
+### Mobile Play (Offline)
+
+## Reflection
+
