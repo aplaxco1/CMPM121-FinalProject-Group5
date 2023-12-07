@@ -1,6 +1,9 @@
 import * as Phaser from "phaser";
 import YAML from "yamljs";
 import scenariosURL from "/assets/scenarios.yml?url";
+import en from "/assets/en.json?url";
+import cn from "/assets/cn.json?url";
+import ar from "/assets/ar.json?url";
 
 export interface scenario {
   scenario: string;
@@ -21,12 +24,22 @@ export default class Menu extends Phaser.Scene {
 
   scenarioData: scenario[] = [];
 
+  currentLang?: any;
+  enLang?: any;
+  cnLang?: any;
+  arLang?: any;
+
   constructor() {
     super("menu");
   }
 
   preload() {
     this.load.text("scenarios", scenariosURL);
+
+    // game text in multiple languages
+    this.load.text("en", en);
+    this.load.text("cn", cn);
+    this.load.text("ar", ar);
   }
 
   #addKey(
@@ -37,6 +50,28 @@ export default class Menu extends Phaser.Scene {
 
   create() {
     //localStorage.clear();
+
+    // load all language text
+    this.enLang = JSON.parse(this.cache.text.get("en"));
+    this.cnLang = JSON.parse(this.cache.text.get("cn"));
+    this.arLang = JSON.parse(this.cache.text.get("ar"));
+
+    if (localStorage.getItem("currentLang")) {
+      // loads the most recently selected language
+      let lang = localStorage.getItem("currentLang");
+      if (lang == "en") {
+        this.currentLang = this.enLang;
+      }
+      if (lang == "cn") {
+        this.currentLang = this.cnLang;
+      }
+      if (lang == "ar") {
+        this.currentLang = this.arLang;
+      }
+    } else {
+      // default selected language is english
+      this.currentLang = this.enLang;
+    }
 
     // load scenario data from external dsl text file
     const details = this.cache.text.get("scenarios");
@@ -49,6 +84,7 @@ export default class Menu extends Phaser.Scene {
       wordWrap: { width: 700 },
     };
 
+    // all this text still needs to be translated
     this.title = this.add
       .text(
         (this.game.config.width as number) / 2,
@@ -121,15 +157,20 @@ export default class Menu extends Phaser.Scene {
     // clear all buttons before returning to menu
     const buttonContainer = document.getElementById("ButtonContainer");
     buttonContainer!.innerHTML = "";
+    const languageButtons = document.getElementById("LanguageButtons");
+    languageButtons!.innerHTML = "";
     this.scene.stop();
     this.scene.start("play", {
       scenarioData: this.scenarioData,
       savefile: savefile,
+      language: this.currentLang!,
     });
   }
 
   setUpInteractiveButtons() {
     const buttonContainer = document.getElementById("ButtonContainer");
+    buttonContainer!.innerHTML = "";
+    // these still need to be translated
     const startGameButtons = [
       { text: "Start New Game", savefile: "newgame" },
       { text: "Continue From Last Save", savefile: "autosave" },
@@ -145,6 +186,35 @@ export default class Menu extends Phaser.Scene {
       });
       buttonContainer!.append(startButton);
     }
+
+    const languageButtons = document.getElementById("LanguageButtons");
+    // button for english
+    const enButton = document.createElement("button");
+    enButton.innerHTML = "English";
+    enButton.addEventListener("click", () => {
+      this.currentLang = this.enLang;
+      localStorage.setItem("currentLang", "en");
+      // reload all text on this page here
+    });
+    languageButtons!.append(enButton);
+    // button for chinese
+    const cnButton = document.createElement("button");
+    cnButton.innerHTML = "中文";
+    cnButton.addEventListener("click", () => {
+      this.currentLang = this.cnLang;
+      localStorage.setItem("currentLang", "cn");
+      // reload all text on this page here
+    });
+    languageButtons!.append(cnButton);
+    // button for arabic
+    const arButton = document.createElement("button");
+    arButton.innerHTML = "اَلْعَرَبِيَّة";
+    arButton.addEventListener("click", () => {
+      this.currentLang = this.arLang;
+      localStorage.setItem("currentLang", "ar");
+      // reload all text on this page here
+    });
+    languageButtons!.append(arButton);
   }
 }
 

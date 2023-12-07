@@ -29,3 +29,9 @@ document.body.appendChild(document.createElement("br"));
 const buttonContainer = document.createElement("div");
 buttonContainer.id = "ButtonContainer";
 document.body.appendChild(buttonContainer);
+
+// section just for language buttons
+document.body.appendChild(document.createElement("br"));
+const langButtonContainer = document.createElement("div");
+langButtonContainer.id = "LanguageButtons";
+document.body.appendChild(langButtonContainer);
