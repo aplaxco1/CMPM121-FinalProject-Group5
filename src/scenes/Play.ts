@@ -108,18 +108,24 @@ export default class Play extends Phaser.Scene {
   // determines which save file to load game from
   loadingFrom?: string;
 
-  // contains all text data from json file
-  currentLang?: any;
+  currentLang?: string; // "en", "cn", or "ar"
+  langText?: any; // contains all text data from json file
 
   constructor() {
     super("play");
   }
 
-  init(data: { scenarioData: scenario[]; savefile: string; language: any }) {
+  init(data: {
+    scenarioData: scenario[];
+    savefile: string;
+    language: string;
+    languageText: any;
+  }) {
     // initialize scene based on which save file is being loaded
     this.loadingFrom = data.savefile;
     this.scenarioData = data.scenarioData;
     this.currentLang = data.language;
+    this.langText = data.languageText;
     console.log(this.currentLang);
   }
 
@@ -153,8 +159,13 @@ export default class Play extends Phaser.Scene {
     }
 
     const date: Date = new Date();
+    const allDates = {
+      en: date.toLocaleString("en-GB"),
+      cn: date.toLocaleString("zh-CN"),
+      ar: date.toLocaleString("ar-SA"),
+    };
     const data: SaveData = {
-      time: date.toString(),
+      time: JSON.stringify(allDates),
       gridData: JSON.stringify(cellList),
       sunLevel: this.currentSunLevel!.toString(),
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
@@ -760,55 +771,55 @@ export default class Play extends Phaser.Scene {
 
     let buttons = [
       {
-        text: this.currentLang!.Plant,
+        text: this.langText!.Plant,
         action: () => {
           this.plant(cropOptions[this.currCropIndex]);
         },
       },
       {
-        text: this.currentLang!.Harvest,
+        text: this.langText!.Harvest,
         action: () => {
           this.harvest();
         },
       },
       {
-        text: this.currentLang!.Sleep,
+        text: this.langText!.Sleep,
         action: () => {
           this.playerSleep();
         },
       },
       {
-        text: this.currentLang!.Undo,
+        text: this.langText!.Undo,
         action: () => {
           this.undoCommand();
         },
       },
       {
-        text: this.currentLang!.Redo,
+        text: this.langText!.Redo,
         action: () => {
           this.redoCommand();
         },
       },
       {
-        text: this.currentLang!.ReturnToMenu,
+        text: this.langText!.ReturnToMenu,
         action: () => {
           this.returnToMenu();
         },
       },
       {
-        text: this.currentLang!.Save1,
+        text: this.langText!.Save1,
         action: () => {
           this.saveGame("savefile01");
         },
       },
       {
-        text: this.currentLang!.Save2,
+        text: this.langText!.Save2,
         action: () => {
           this.saveGame("savefile02");
         },
       },
       {
-        text: this.currentLang!.Save3,
+        text: this.langText!.Save3,
         action: () => {
           this.saveGame("savefile03");
         },

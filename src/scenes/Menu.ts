@@ -24,7 +24,8 @@ export default class Menu extends Phaser.Scene {
 
   scenarioData: scenario[] = [];
 
-  currentLang?: any;
+  currentLang?: string; // either "en", "cn", or "ar"
+  langText?: any; // contains all text data in current language
   enLang?: any;
   cnLang?: any;
   arLang?: any;
@@ -58,19 +59,20 @@ export default class Menu extends Phaser.Scene {
 
     if (localStorage.getItem("currentLang")) {
       // loads the most recently selected language
-      let lang = localStorage.getItem("currentLang");
+      let lang = localStorage.getItem("currentLang")!;
+      this.currentLang = lang;
       if (lang == "en") {
-        this.currentLang = this.enLang;
+        this.langText = this.enLang;
       }
       if (lang == "cn") {
-        this.currentLang = this.cnLang;
+        this.langText = this.cnLang;
       }
       if (lang == "ar") {
-        this.currentLang = this.arLang;
+        this.langText = this.arLang;
       }
     } else {
       // default selected language is english
-      this.currentLang = this.enLang;
+      this.langText = this.enLang;
     }
 
     // load scenario data from external dsl text file
@@ -98,19 +100,22 @@ export default class Menu extends Phaser.Scene {
     }
     if (localStorage.getItem("savefile01")) {
       const data = JSON.parse(localStorage.getItem("savefile01")!);
-      this.title.text += "[1] Save File 01 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[1] Save File 01 - [" + time + "]\n";
     } else {
       this.title.text += "[1] Save File 01 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile02")) {
       const data = JSON.parse(localStorage.getItem("savefile02")!);
-      this.title.text += "[2] Save File 02 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[2] Save File 02 - [" + time + "]\n";
     } else {
       this.title.text += "[2] Save File 02 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile03")) {
       const data = JSON.parse(localStorage.getItem("savefile03")!);
-      this.title.text += "[3] Save File 03 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[3] Save File 03 - [" + time + "]\n";
     } else {
       this.title.text += "[3] Save File 03 - [EMPTY]\n";
     }
@@ -164,6 +169,7 @@ export default class Menu extends Phaser.Scene {
       scenarioData: this.scenarioData,
       savefile: savefile,
       language: this.currentLang!,
+      languageText: this.langText!,
     });
   }
 
@@ -192,7 +198,8 @@ export default class Menu extends Phaser.Scene {
     const enButton = document.createElement("button");
     enButton.innerHTML = "English";
     enButton.addEventListener("click", () => {
-      this.currentLang = this.enLang;
+      this.currentLang = "en";
+      this.langText = this.enLang;
       localStorage.setItem("currentLang", "en");
       // reload all text on this page here
     });
@@ -201,7 +208,8 @@ export default class Menu extends Phaser.Scene {
     const cnButton = document.createElement("button");
     cnButton.innerHTML = "中文";
     cnButton.addEventListener("click", () => {
-      this.currentLang = this.cnLang;
+      this.currentLang = "cn";
+      this.langText = this.cnLang;
       localStorage.setItem("currentLang", "cn");
       // reload all text on this page here
     });
@@ -210,11 +218,25 @@ export default class Menu extends Phaser.Scene {
     const arButton = document.createElement("button");
     arButton.innerHTML = "اَلْعَرَبِيَّة";
     arButton.addEventListener("click", () => {
-      this.currentLang = this.arLang;
+      this.currentLang = "ar";
+      this.langText = this.arLang;
       localStorage.setItem("currentLang", "ar");
       // reload all text on this page here
     });
     languageButtons!.append(arButton);
+  }
+
+  getTimeForCurrLang(time: any): string {
+    if (this.currentLang == "en") {
+      return time.en;
+    }
+    if (this.currentLang == "cn") {
+      return time.cn;
+    }
+    if (this.currentLang == "ar") {
+      return time.ar;
+    }
+    return "";
   }
 }
 
