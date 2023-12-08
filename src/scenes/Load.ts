@@ -6,6 +6,8 @@ import plantTestURL from "/assets/tempemojidonotuse.png";
 import cropspriteURL from "/assets/crops.png";
 import cropspritemapURL from "/assets/cropsprite_arr.json?url";
 
+
+
 export default class Load extends Phaser.Scene {
   constructor() {
     super("load");
@@ -129,3 +131,5 @@ export default class Load extends Phaser.Scene {
     this.scene.start("menu");
   }
 }
+
+
