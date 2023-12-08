@@ -1,6 +1,9 @@
 import * as Phaser from "phaser";
 import YAML from "yamljs";
 import scenariosURL from "/assets/scenarios.yml?url";
+import en from "/assets/en.json?url";
+import cn from "/assets/cn.json?url";
+import ar from "/assets/ar.json?url";
 
 export interface scenario {
   scenario: string;
@@ -21,12 +24,23 @@ export default class Menu extends Phaser.Scene {
 
   scenarioData: scenario[] = [];
 
+  currentLang?: string; // either "en", "cn", or "ar"
+  langText?: any; // contains all text data in current language
+  enLang?: any;
+  cnLang?: any;
+  arLang?: any;
+
   constructor() {
     super("menu");
   }
 
   preload() {
     this.load.text("scenarios", scenariosURL);
+
+    // game text in multiple languages
+    this.load.text("en", en);
+    this.load.text("cn", cn);
+    this.load.text("ar", ar);
   }
 
   #addKey(
@@ -37,6 +51,29 @@ export default class Menu extends Phaser.Scene {
 
   create() {
     //localStorage.clear();
+
+    // load all language text
+    this.enLang = JSON.parse(this.cache.text.get("en"));
+    this.cnLang = JSON.parse(this.cache.text.get("cn"));
+    this.arLang = JSON.parse(this.cache.text.get("ar"));
+
+    if (localStorage.getItem("currentLang")) {
+      // loads the most recently selected language
+      let lang = localStorage.getItem("currentLang")!;
+      this.currentLang = lang;
+      if (lang == "en") {
+        this.langText = this.enLang;
+      }
+      if (lang == "cn") {
+        this.langText = this.cnLang;
+      }
+      if (lang == "ar") {
+        this.langText = this.arLang;
+      }
+    } else {
+      // default selected language is english
+      this.langText = this.enLang;
+    }
 
     // load scenario data from external dsl text file
     const details = this.cache.text.get("scenarios");
@@ -49,6 +86,7 @@ export default class Menu extends Phaser.Scene {
       wordWrap: { width: 700 },
     };
 
+    // all this text still needs to be translated
     this.title = this.add
       .text(
         (this.game.config.width as number) / 2,
@@ -62,19 +100,22 @@ export default class Menu extends Phaser.Scene {
     }
     if (localStorage.getItem("savefile01")) {
       const data = JSON.parse(localStorage.getItem("savefile01")!);
-      this.title.text += "[1] Save File 01 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[1] Save File 01 - [" + time + "]\n";
     } else {
       this.title.text += "[1] Save File 01 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile02")) {
       const data = JSON.parse(localStorage.getItem("savefile02")!);
-      this.title.text += "[2] Save File 02 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[2] Save File 02 - [" + time + "]\n";
     } else {
       this.title.text += "[2] Save File 02 - [EMPTY]\n";
     }
     if (localStorage.getItem("savefile03")) {
       const data = JSON.parse(localStorage.getItem("savefile03")!);
-      this.title.text += "[3] Save File 03 - [" + data.time + "]\n";
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      this.title.text += "[3] Save File 03 - [" + time + "]\n";
     } else {
       this.title.text += "[3] Save File 03 - [EMPTY]\n";
     }
@@ -121,15 +162,21 @@ export default class Menu extends Phaser.Scene {
     // clear all buttons before returning to menu
     const buttonContainer = document.getElementById("ButtonContainer");
     buttonContainer!.innerHTML = "";
+    const languageButtons = document.getElementById("LanguageButtons");
+    languageButtons!.innerHTML = "";
     this.scene.stop();
     this.scene.start("play", {
       scenarioData: this.scenarioData,
       savefile: savefile,
+      language: this.currentLang!,
+      languageText: this.langText!,
     });
   }
 
   setUpInteractiveButtons() {
     const buttonContainer = document.getElementById("ButtonContainer");
+    buttonContainer!.innerHTML = "";
+    // these still need to be translated
     const startGameButtons = [
       { text: "Start New Game", savefile: "newgame" },
       { text: "Continue From Last Save", savefile: "autosave" },
@@ -145,6 +192,51 @@ export default class Menu extends Phaser.Scene {
       });
       buttonContainer!.append(startButton);
     }
+
+    const languageButtons = document.getElementById("LanguageButtons");
+    // button for english
+    const enButton = document.createElement("button");
+    enButton.innerHTML = "English";
+    enButton.addEventListener("click", () => {
+      this.currentLang = "en";
+      this.langText = this.enLang;
+      localStorage.setItem("currentLang", "en");
+      // reload all text on this page here
+    });
+    languageButtons!.append(enButton);
+    // button for chinese
+    const cnButton = document.createElement("button");
+    cnButton.innerHTML = "中文";
+    cnButton.addEventListener("click", () => {
+      this.currentLang = "cn";
+      this.langText = this.cnLang;
+      localStorage.setItem("currentLang", "cn");
+      // reload all text on this page here
+    });
+    languageButtons!.append(cnButton);
+    // button for arabic
+    const arButton = document.createElement("button");
+    arButton.innerHTML = "اَلْعَرَبِيَّة";
+    arButton.addEventListener("click", () => {
+      this.currentLang = "ar";
+      this.langText = this.arLang;
+      localStorage.setItem("currentLang", "ar");
+      // reload all text on this page here
+    });
+    languageButtons!.append(arButton);
+  }
+
+  getTimeForCurrLang(time: any): string {
+    if (this.currentLang == "en") {
+      return time.en;
+    }
+    if (this.currentLang == "cn") {
+      return time.cn;
+    }
+    if (this.currentLang == "ar") {
+      return time.ar;
+    }
+    return "";
   }
 }
 

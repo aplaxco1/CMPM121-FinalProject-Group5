@@ -17,6 +17,83 @@ export interface CropOption {
   canGrow(growthcontext: GrowthContext): boolean;
 }
 
+export const cropOptions: CropOption[] = [
+  {
+    cropName: "Strawberry",
+    maxGrowthLevel: 6,
+    sunLevel: 2,
+    waterLevel: 3,
+    canGrow(growthContext): boolean {
+      // can only grow if next to at least two other strawberries
+      let nearbyStrawberries = 0;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null && cell.crop.cropName == this.cropName) {
+          nearbyStrawberries += 1;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        nearbyStrawberries >= 2
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
+  {
+    cropName: "Potato",
+    maxGrowthLevel: 6,
+    sunLevel: 3,
+    waterLevel: 4,
+    canGrow(growthContext): boolean {
+      // can only grow if ONLY potatoes near it
+      let onlyPotatoes: boolean = true;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null && cell.crop.cropName != this.cropName) {
+          onlyPotatoes = false;
+          break;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        onlyPotatoes
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
+  {
+    cropName: "Corn",
+    maxGrowthLevel: 6,
+    sunLevel: 4,
+    waterLevel: 2,
+    canGrow(growthContext): boolean {
+      // can only grow if no plants nearby
+      let enoughSpace: boolean = true;
+      for (let cell of growthContext.nearbyCells) {
+        if (cell.crop != null) {
+          enoughSpace = false;
+          break;
+        }
+      }
+      if (
+        growthContext.globalSunLevel >= this.sunLevel &&
+        growthContext.cellWaterLevel >= this.waterLevel &&
+        enoughSpace
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
+];
+
 export class Crop extends Phaser.GameObjects.Sprite {
   cropData?: CropOption;
   cropSprite: Phaser.GameObjects.Sprite;

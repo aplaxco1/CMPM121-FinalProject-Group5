@@ -2,6 +2,7 @@ import * as Phaser from "phaser";
 import Player from "../classes/Player.ts";
 import { scenario } from "../scenes/Menu.ts";
 import {
+  cropOptions,
   Crop,
   CropOption,
   GrowthContext,
@@ -13,83 +14,6 @@ const gridCellWidth: number = 60;
 const gridCellHeight: number = 60;
 const uIBarHeight: number = 240;
 const suncolor = [0x34b070, 0x6f95b8, 0x785871, 0xb37050, 0xf7a53b, 0xffd134];
-
-const cropOptions: CropOption[] = [
-  {
-    cropName: "Strawberry",
-    maxGrowthLevel: 6,
-    sunLevel: 2,
-    waterLevel: 3,
-    canGrow(growthContext): boolean {
-      // can only grow if next to at least two other strawberries
-      let nearbyStrawberries = 0;
-      for (let cell of growthContext.nearbyCells) {
-        if (cell.crop != null && cell.crop.cropName == this.cropName) {
-          nearbyStrawberries += 1;
-        }
-      }
-      if (
-        growthContext.globalSunLevel >= this.sunLevel &&
-        growthContext.cellWaterLevel >= this.waterLevel &&
-        nearbyStrawberries >= 2
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-  },
-  {
-    cropName: "Potato",
-    maxGrowthLevel: 6,
-    sunLevel: 3,
-    waterLevel: 4,
-    canGrow(growthContext): boolean {
-      // can only grow if ONLY potatoes near it
-      let onlyPotatoes: boolean = true;
-      for (let cell of growthContext.nearbyCells) {
-        if (cell.crop != null && cell.crop.cropName != this.cropName) {
-          onlyPotatoes = false;
-          break;
-        }
-      }
-      if (
-        growthContext.globalSunLevel >= this.sunLevel &&
-        growthContext.cellWaterLevel >= this.waterLevel &&
-        onlyPotatoes
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-  },
-  {
-    cropName: "Corn",
-    maxGrowthLevel: 6,
-    sunLevel: 4,
-    waterLevel: 2,
-    canGrow(growthContext): boolean {
-      // can only grow if no plants nearby
-      let enoughSpace: boolean = true;
-      for (let cell of growthContext.nearbyCells) {
-        if (cell.crop != null) {
-          enoughSpace = false;
-          break;
-        }
-      }
-      if (
-        growthContext.globalSunLevel >= this.sunLevel &&
-        growthContext.cellWaterLevel >= this.waterLevel &&
-        enoughSpace
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-  },
-];
 
 interface Command {
   type: string; // either plant or harvest
@@ -184,15 +108,25 @@ export default class Play extends Phaser.Scene {
   // determines which save file to load game from
   loadingFrom?: string;
 
+  currentLang?: string; // "en", "cn", or "ar"
+  langText?: any; // contains all text data from json file
+
   constructor() {
     super("play");
   }
 
-  init(data: { scenarioData: scenario[]; savefile: string }) {
+  init(data: {
+    scenarioData: scenario[];
+    savefile: string;
+    language: string;
+    languageText: any;
+  }) {
     // initialize scene based on which save file is being loaded
     this.loadingFrom = data.savefile;
     this.scenarioData = data.scenarioData;
-    console.log(this.scenarioData);
+    this.currentLang = data.language;
+    this.langText = data.languageText;
+    console.log(this.currentLang);
   }
 
   #addKey(
@@ -225,8 +159,13 @@ export default class Play extends Phaser.Scene {
     }
 
     const date: Date = new Date();
+    const allDates = {
+      en: date.toLocaleString("en-GB"),
+      cn: date.toLocaleString("zh-CN"),
+      ar: date.toLocaleString("ar-SA"),
+    };
     const data: SaveData = {
-      time: date.toString(),
+      time: JSON.stringify(allDates),
       gridData: JSON.stringify(cellList),
       sunLevel: this.currentSunLevel!.toString(),
       cropInventory: JSON.stringify(Array.from(this.collectedCrops.entries())),
@@ -352,7 +291,6 @@ export default class Play extends Phaser.Scene {
       this.drawGrid();
       this.updateSun();
     } else {
-      // LOAD FROM NUMBERED SAVE FILE (savefile01, savefile02, savefile03)
       this.loadGame(this.loadingFrom!);
     }
 
@@ -379,11 +317,9 @@ export default class Play extends Phaser.Scene {
   }
 
   update() {
-    // test win condition is to collect 5 trees
     if (!this.sleeping && !this.allScenariosCompleted) {
       this.checkCurrentWinCondition();
 
-      // simple player movement
       this.movePlayer();
 
       // update all text
@@ -835,55 +771,55 @@ export default class Play extends Phaser.Scene {
 
     let buttons = [
       {
-        text: "Plant",
+        text: this.langText!.Plant,
         action: () => {
           this.plant(cropOptions[this.currCropIndex]);
         },
       },
       {
-        text: "Harvest",
+        text: this.langText!.Harvest,
         action: () => {
           this.harvest();
         },
       },
       {
-        text: "Sleep",
+        text: this.langText!.Sleep,
         action: () => {
           this.playerSleep();
         },
       },
       {
-        text: "Undo",
+        text: this.langText!.Undo,
         action: () => {
           this.undoCommand();
         },
       },
       {
-        text: "Redo",
+        text: this.langText!.Redo,
         action: () => {
           this.redoCommand();
         },
       },
       {
-        text: "Return To Menu",
+        text: this.langText!.ReturnToMenu,
         action: () => {
           this.returnToMenu();
         },
       },
       {
-        text: "Save 1",
+        text: this.langText!.Save1,
         action: () => {
           this.saveGame("savefile01");
         },
       },
       {
-        text: "Save 2",
+        text: this.langText!.Save2,
         action: () => {
           this.saveGame("savefile02");
         },
       },
       {
-        text: "Save 3",
+        text: this.langText!.Save3,
         action: () => {
           this.saveGame("savefile03");
         },

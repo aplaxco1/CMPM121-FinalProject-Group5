@@ -1,11 +1,11 @@
 {
-    "Plant": "种植",
-    "Harvest": "收获",
-    "Sleep": "睡眠",
-    "Undo": "撤销",
-    "Redo": "重做",
-    "Return To Menu": "返回菜单",
-    "Save 1": "保存1",
-    "Save 2": "保存2",
-    "Save 3": "保存3"
-  }
+  "Plant": "种植",
+  "Harvest": "收获",
+  "Sleep": "睡眠",
+  "Undo": "撤销",
+  "Redo": "重做",
+  "ReturnToMenu": "返回菜单",
+  "Save1": "保存1",
+  "Save2": "保存2",
+  "Save3": "保存3"
+}

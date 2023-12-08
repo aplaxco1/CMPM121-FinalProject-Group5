@@ -1,11 +1,11 @@
 {
-    "Plant": "Plant",
-    "Harvest": "Harvest",
-    "Sleep": "Sleep",
-    "Undo": "Undo",
-    "Redo": "Redo",
-    "Return To Menu": "Return To Menu",
-    "Save 1": "Save 1",
-    "Save 2": "Save 2",
-    "Save 3": "Save 3"
-  }
+  "Plant": "Plant",
+  "Harvest": "Harvest",
+  "Sleep": "Sleep",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "ReturnToMenu": "Return to Menu",
+  "Save1": "Save 1",
+  "Save2": "Save 2",
+  "Save3": "Save 3"
+}
