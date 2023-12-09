@@ -9,7 +9,9 @@ export interface scenario {
   scenario: string;
   available_crops: string[];
   win_conditions: [string, number][];
-  human_instructions: string;
+  human_instructions_en: string;
+  human_instructions_cn: string;
+  human_instructions_ar: string;
   sun_probability?: number;
   rain_probability?: number;
 }
@@ -25,6 +27,7 @@ export default class Menu extends Phaser.Scene {
   scenarioData: scenario[] = [];
 
   currentLang?: string; // either "en", "cn", or "ar"
+  numFormat?: string;
   langText?: any; // contains all text data in current language
   enLang?: any;
   cnLang?: any;
@@ -63,16 +66,20 @@ export default class Menu extends Phaser.Scene {
       this.currentLang = lang;
       if (lang == "en") {
         this.langText = this.enLang;
+        this.numFormat = "en-GB";
       }
       if (lang == "cn") {
         this.langText = this.cnLang;
+        this.numFormat = "zh-CN";
       }
       if (lang == "ar") {
         this.langText = this.arLang;
+        this.numFormat = "ar-SA";
       }
     } else {
       // default selected language is english
       this.langText = this.enLang;
+      this.numFormat = "en-GB";
     }
 
     // load scenario data from external dsl text file
@@ -149,6 +156,7 @@ export default class Menu extends Phaser.Scene {
       savefile: savefile,
       language: this.currentLang!,
       languageText: this.langText!,
+      numFormat: this.numFormat,
     });
   }
 
@@ -163,85 +171,42 @@ export default class Menu extends Phaser.Scene {
     if (localStorage.getItem("savefile01")) {
       const data = JSON.parse(localStorage.getItem("savefile01")!);
       const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[1] " + this.langText!.savefile01 + " - [" + time + "]\n";
-      } else {
-        this.title!.text +=
-          "[1] " + "[" + time + "] - " + this.langText!.savefile01 + "\n";
-      }
+      this.title!.text +=
+        "[1] " + this.langText!.savefile01 + " - [" + time + "]\n";
     } else {
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[1] " +
-          this.langText!.savefile01 +
-          " - [" +
-          this.langText!.Empty +
-          "]\n";
-      } else {
-        this.title!.text +=
-          "[1] " +
-          "[" +
-          this.langText!.Empty +
-          "] - " +
-          this.langText!.savefile01 +
-          "\n";
-      }
+      this.title!.text +=
+        "[1] " +
+        this.langText!.savefile01 +
+        " - [" +
+        this.langText!.Empty +
+        "]\n";
     }
     if (localStorage.getItem("savefile02")) {
       const data = JSON.parse(localStorage.getItem("savefile02")!);
       const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[2] " + this.langText!.savefile02 + " - [" + time + "]\n";
-      } else {
-        this.title!.text +=
-          "[2] " + "[" + time + "] - " + this.langText!.savefile02 + "\n";
-      }
+      this.title!.text +=
+        "[2] " + this.langText!.savefile02 + " - [" + time + "]\n";
     } else {
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[2] " +
-          this.langText!.savefile02 +
-          " - [" +
-          this.langText!.Empty +
-          "]\n";
-      } else {
-        this.title!.text +=
-          "[2] " +
-          "[" +
-          this.langText!.Empty +
-          "] - " +
-          this.langText!.savefile02 +
-          "\n";
-      }
+      this.title!.text +=
+        "[2] " +
+        this.langText!.savefile02 +
+        " - [" +
+        this.langText!.Empty +
+        "]\n";
     }
     if (localStorage.getItem("savefile03")) {
       const data = JSON.parse(localStorage.getItem("savefile03")!);
       const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[3] " + this.langText!.savefile03 + " - [" + time + "]\n";
-      } else {
-        this.title!.text +=
-          "[3] " + "[" + time + "] - " + this.langText!.savefile03;
-      }
+
+      this.title!.text +=
+        "[3] " + this.langText!.savefile03 + " - [" + time + "]\n";
     } else {
-      if (this.currentLang! != "ar") {
-        this.title!.text +=
-          "[3] " +
-          this.langText!.savefile03 +
-          " - [" +
-          this.langText!.Empty +
-          "]\n";
-      } else {
-        this.title!.text +=
-          "[3] " +
-          "[" +
-          this.langText!.Empty +
-          "] - " +
-          this.langText!.savefile03;
-      }
+      this.title!.text +=
+        "[3] " +
+        this.langText!.savefile03 +
+        " - [" +
+        this.langText!.Empty +
+        "]\n";
     }
   }
 
@@ -273,6 +238,7 @@ export default class Menu extends Phaser.Scene {
     enButton.innerHTML = "English";
     enButton.addEventListener("click", () => {
       this.currentLang = "en";
+      this.numFormat = "en-GB";
       this.langText = this.enLang;
       localStorage.setItem("currentLang", "en");
       this.initializeMenuText();
@@ -284,6 +250,7 @@ export default class Menu extends Phaser.Scene {
     cnButton.innerHTML = "中文";
     cnButton.addEventListener("click", () => {
       this.currentLang = "cn";
+      this.numFormat = "zh-CN";
       this.langText = this.cnLang;
       localStorage.setItem("currentLang", "cn");
       this.initializeMenuText();
@@ -295,6 +262,7 @@ export default class Menu extends Phaser.Scene {
     arButton.innerHTML = "اَلْعَرَبِيَّة";
     arButton.addEventListener("click", () => {
       this.currentLang = "ar";
+      this.numFormat = "ar-SA";
       this.langText = this.arLang;
       localStorage.setItem("currentLang", "ar");
       this.initializeMenuText();

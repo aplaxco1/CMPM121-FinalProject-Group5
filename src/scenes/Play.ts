@@ -109,6 +109,7 @@ export default class Play extends Phaser.Scene {
   loadingFrom?: string;
 
   currentLang?: string; // "en", "cn", or "ar"
+  numFormat?: string;
   langText?: any; // contains all text data from json file
 
   constructor() {
@@ -120,13 +121,14 @@ export default class Play extends Phaser.Scene {
     savefile: string;
     language: string;
     languageText: any;
+    numFormat: string;
   }) {
     // initialize scene based on which save file is being loaded
     this.loadingFrom = data.savefile;
     this.scenarioData = data.scenarioData;
     this.currentLang = data.language;
     this.langText = data.languageText;
-    console.log(this.currentLang);
+    this.numFormat = data.numFormat;
   }
 
   #addKey(
@@ -257,9 +259,9 @@ export default class Play extends Phaser.Scene {
     this.undo = this.#addKey("Z");
     this.redo = this.#addKey("X");
     // save keys
-    this.save1 = this.#addKey("F1");
-    this.save2 = this.#addKey("F2");
-    this.save3 = this.#addKey("F3");
+    this.save1 = this.#addKey("ONE");
+    this.save2 = this.#addKey("TWO");
+    this.save3 = this.#addKey("THREE");
     this.return = this.#addKey("ESC");
 
     this.numRows = (this.game.config.width as number) / gridCellWidth;
@@ -279,6 +281,7 @@ export default class Play extends Phaser.Scene {
     );
 
     if (this.loadingFrom! == "newgame") {
+      this.cropMap = new Map();
       // randomize global sun and water level
       this.randomizeConditions();
       this.initializeGrid();
@@ -324,11 +327,13 @@ export default class Play extends Phaser.Scene {
 
       // update all text
       this.cropText!.text =
-        "Current Crop Selected: " +
-        cropOptions[this.possibleCropIndicies[this.currCropIndex]].cropName;
+        this.langText!.CurrentCropSelected +
+        ": " +
+        this.getCropName(
+          cropOptions[this.possibleCropIndicies[this.currCropIndex]],
+        );
       this.objectiveText!.text =
-        "Current Objective: " +
-        this.scenarioData![this.currScenarioIndex].human_instructions;
+        this.langText.CurrentObjective + ": " + this.getInstructions();
       this.displayCurrentCellStatus();
       this.displayInventory();
 
@@ -352,15 +357,15 @@ export default class Play extends Phaser.Scene {
       // save game
       if (Phaser.Input.Keyboard.JustDown(this.save1!)) {
         this.saveGame("savefile01");
-        alert("Save Complete");
+        alert(this.langText.SaveComplete);
       }
       if (Phaser.Input.Keyboard.JustDown(this.save2!)) {
         this.saveGame("savefile02");
-        alert("Save Complete");
+        alert(this.langText.SaveComplete);
       }
       if (Phaser.Input.Keyboard.JustDown(this.save3!)) {
         this.saveGame("savefile03");
-        alert("Save Complete");
+        alert(this.langText.SaveComplete);
       }
 
       // return to menu
@@ -380,7 +385,7 @@ export default class Play extends Phaser.Scene {
         .text(
           (this.game.config.width as number) / 2,
           (this.game.config.height as number) / 2,
-          "You Win!\n\nPress [SPACE] to restart.\n\n",
+          this.langText.WinText,
           this.textConfig,
         )
         .setOrigin(0.5);
@@ -408,7 +413,7 @@ export default class Play extends Phaser.Scene {
       this.currScenarioIndex -= 1;
       this.allScenariosCompleted = true;
     } else {
-      alert("Next objective!");
+      alert(this.langText.NextObjective);
       this.loadCurrentScenario(this.currScenarioIndex);
       this.cropMap.forEach((value: any, key: any) => {
         if (value != null) {
@@ -762,10 +767,14 @@ export default class Play extends Phaser.Scene {
     this.setUpMovementButtons(buttonContainer!);
 
     const cycleCropButton = document.createElement("button");
-    cycleCropButton.innerHTML = cropOptions[this.currCropIndex].cropName;
+    cycleCropButton.innerHTML = this.getCropName(
+      cropOptions[this.currCropIndex],
+    );
     cycleCropButton.addEventListener("click", () => {
       this.changeSelectedCrop();
-      cycleCropButton.innerHTML = cropOptions[this.currCropIndex].cropName;
+      cycleCropButton.innerHTML = this.getCropName(
+        cropOptions[this.currCropIndex],
+      );
     });
     buttonContainer!.append(cycleCropButton);
 
@@ -884,65 +893,66 @@ export default class Play extends Phaser.Scene {
       .text(
         0,
         (this.game.config.height as number) - uIBarHeight,
-        "[←],[↑],[→],[↓] - Move\n[C] Cycle Through Crops, [P] Plant Crop, [H] - Harvest Crop\n[S] - Sleep (Progress Turn)\n[Z] - Undo, [X] - Redo\n[F1] - Save (File 01), [F2] - Save (File 02), [F3] - Save (File 03)\n[ESC] Return to Menu",
+        this.langText!.Controls,
         { color: "0x000000" },
       )
       .setOrigin(0, 0);
 
     this.objectiveText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 1.65,
-        "CurrentObjective: " +
-          this.scenarioData![this.currScenarioIndex].human_instructions,
-        { color: "0x000000" },
-      )
+      .text(0, (this.game.config.height as number) - uIBarHeight / 1.65, "", {
+        color: "0x000000",
+      })
       .setOrigin(0, 0);
 
     this.cropText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 2,
-        "Current Crop Selected: ",
-        { color: "0x000000" },
-      )
+      .text(0, (this.game.config.height as number) - uIBarHeight / 2, "", {
+        color: "0x000000",
+      })
       .setOrigin(0, 0);
 
     this.statusText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 2.5,
-        "Current Cell:\n",
-        { color: "0x000000" },
-      )
+      .text(0, (this.game.config.height as number) - uIBarHeight / 2.5, "", {
+        color: "0x000000",
+      })
       .setOrigin(0, 0);
 
     this.inventoryText = this.add
-      .text(
-        0,
-        (this.game.config.height as number) - uIBarHeight / 10,
-        "Current Crops:\n",
-        { color: "0x000000" },
-      )
+      .text(0, (this.game.config.height as number) - uIBarHeight / 12, "", {
+        color: "0x000000",
+      })
       .setOrigin(0, 0);
   }
 
   displayCurrentCellStatus() {
-    this.statusText!.text = "Current Cell: ";
     const currCell = this.player!.currCell;
-    this.statusText!.text += currCell!.x + ", " + currCell!.y + "\n";
-    this.statusText!.text += "Sun Level = " + this.currentSunLevel + "\n";
+    const waterLevel = this.gridCells![currCell!.x][currCell!.y].waterLevel;
+    this.statusText!.text =
+      this.langText.CurrentCell +
+      ": " +
+      currCell!.x.toLocaleString(this.numFormat) +
+      " " +
+      currCell!.y.toLocaleString(this.numFormat) +
+      "\n";
     this.statusText!.text +=
-      "Cell Water Level = " +
-      this.gridCells![currCell!.x][currCell!.y].waterLevel +
+      this.langText.SunLevel +
+      ": " +
+      this.currentSunLevel!.toLocaleString(this.numFormat) +
+      "\n";
+    this.statusText!.text +=
+      this.langText.CellWaterLevel +
+      ": " +
+      waterLevel.toLocaleString(this.numFormat) +
       "\n";
     const currCrop = this.cropMap.get(JSON.stringify(currCell));
     if (currCrop != null) {
       this.statusText!.text +=
-        "Crop = " +
-        currCrop.getPlantName() +
-        ", Crop Level = " +
-        currCrop.getGrowthLevel() +
+        this.langText.Crop +
+        ": " +
+        this.getCropName(currCrop.cropData!) +
+        ", " +
+        this.langText.CropLevel +
+        ": " +
+        currCrop.getGrowthLevel().toLocaleString(this.numFormat) +
         "\n";
       const canItGrow = currCrop.cropData!.canGrow({
         globalSunLevel: this.currentSunLevel!,
@@ -950,22 +960,52 @@ export default class Play extends Phaser.Scene {
         nearbyCells: this.getAdjacentCells(currCell!),
       });
       if (canItGrow) {
-        this.statusText!.text += "Crop Can Grow!\n";
+        this.statusText!.text += this.langText.CropCanGrow + "\n";
       } else {
-        this.statusText!.text += "Crop Cannot Grow!\n";
+        this.statusText!.text += this.langText.CropCanGrow + "\n";
       }
     } else {
-      this.statusText!.text += "No Crop In Cell\n";
+      this.statusText!.text += this.langText.NoCrop;
     }
   }
 
   displayInventory() {
-    this.inventoryText!.text = "Harvest Result: ";
+    this.inventoryText!.text = "";
+    this.inventoryText!.text += this.langText.HarvestResult + ": ";
     for (let cropIndex of this.possibleCropIndicies) {
       const crop = cropOptions[cropIndex];
-      this.inventoryText!.text += crop.cropName + " ";
-      this.inventoryText!.text += this.collectedCrops.get(crop.cropName) + ", ";
+      this.inventoryText!.text +=
+        this.getCropName(crop) +
+        " " +
+        this.collectedCrops.get(crop.cropName)!.toLocaleString(this.numFormat) +
+        ", ";
     }
+  }
+
+  getCropName(cropOption: CropOption): string {
+    if (this.currentLang! == "en") {
+      return cropOption.cropNameStrings.en;
+    }
+    if (this.currentLang! == "cn") {
+      return cropOption.cropNameStrings.cn;
+    }
+    if (this.currentLang! == "ar") {
+      return cropOption.cropNameStrings.ar;
+    }
+    return "";
+  }
+
+  getInstructions(): string {
+    if (this.currentLang! == "en") {
+      return this.scenarioData![this.currScenarioIndex].human_instructions_en;
+    }
+    if (this.currentLang! == "cn") {
+      return this.scenarioData![this.currScenarioIndex].human_instructions_cn;
+    }
+    if (this.currentLang! == "ar") {
+      return this.scenarioData![this.currScenarioIndex].human_instructions_ar;
+    }
+    return "";
   }
 }
 
