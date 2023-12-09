@@ -225,7 +225,11 @@ export default class Menu extends Phaser.Scene {
       const startButton = document.createElement("button");
       startButton.innerHTML = b.text;
       startButton.addEventListener("click", () => {
-        this.startGame(b.savefile);
+        if (localStorage.getItem(b.savefile)) {
+          this.startGame(b.savefile);
+        } else {
+          this.startGame("newgame");
+        }
       });
       buttonContainer!.append(startButton);
     }
