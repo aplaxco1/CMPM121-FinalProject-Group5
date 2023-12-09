@@ -32,7 +32,7 @@
   "SunLevel": "Sun Level",
   "CellWaterLevel": "Cell Water Level",
   "Crop": "Crop",
-  "CropLevel": ", Crop Level",
+  "CropLevel": "Crop Level",
   "CropCanGrow": "Crop Can Grow!",
   "CropCannotGrow": "Crop Cannot Grow!",
   "NoCrop": "No Crop In Cell",
