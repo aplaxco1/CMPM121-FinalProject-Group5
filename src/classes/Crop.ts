@@ -11,6 +11,7 @@ export interface GrowthContext {
 
 export interface CropOption {
   cropName: string;
+  cropNameStrings: { en: string; cn: string; ar: string };
   maxGrowthLevel: number;
   sunLevel: number;
   waterLevel: number;
@@ -20,6 +21,7 @@ export interface CropOption {
 export const cropOptions: CropOption[] = [
   {
     cropName: "Strawberry",
+    cropNameStrings: { en: "Strawberry", cn: "草莓", ar: "الفراولة" },
     maxGrowthLevel: 6,
     sunLevel: 2,
     waterLevel: 3,
@@ -44,6 +46,7 @@ export const cropOptions: CropOption[] = [
   },
   {
     cropName: "Potato",
+    cropNameStrings: { en: "Potato", cn: "土豆", ar: "البطاطس" },
     maxGrowthLevel: 6,
     sunLevel: 3,
     waterLevel: 4,
@@ -69,6 +72,7 @@ export const cropOptions: CropOption[] = [
   },
   {
     cropName: "Corn",
+    cropNameStrings: { en: "Corn", cn: "玉米", ar: "حبوب ذرة" },
     maxGrowthLevel: 6,
     sunLevel: 4,
     waterLevel: 2,

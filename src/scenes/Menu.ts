@@ -91,34 +91,12 @@ export default class Menu extends Phaser.Scene {
       .text(
         (this.game.config.width as number) / 2,
         (this.game.config.height as number) / 2,
-        "CMPM 121 - Final Project\nGardening Game\n\n[SPACE] Start New Game\n",
+        "",
         menuConfig,
       )
       .setOrigin(0.5);
-    if (localStorage.getItem("autosave")) {
-      this.title.text += "[C] Continue From Last AutoSave\n\n";
-    }
-    if (localStorage.getItem("savefile01")) {
-      const data = JSON.parse(localStorage.getItem("savefile01")!);
-      const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      this.title.text += "[1] Save File 01 - [" + time + "]\n";
-    } else {
-      this.title.text += "[1] Save File 01 - [EMPTY]\n";
-    }
-    if (localStorage.getItem("savefile02")) {
-      const data = JSON.parse(localStorage.getItem("savefile02")!);
-      const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      this.title.text += "[2] Save File 02 - [" + time + "]\n";
-    } else {
-      this.title.text += "[2] Save File 02 - [EMPTY]\n";
-    }
-    if (localStorage.getItem("savefile03")) {
-      const data = JSON.parse(localStorage.getItem("savefile03")!);
-      const time = this.getTimeForCurrLang(JSON.parse(data.time));
-      this.title.text += "[3] Save File 03 - [" + time + "]\n";
-    } else {
-      this.title.text += "[3] Save File 03 - [EMPTY]\n";
-    }
+
+    this.initializeMenuText();
     this.start = this.#addKey("SPACE");
     this.loadAutoSave = this.#addKey("C");
     this.loadSaveFile01 = this.#addKey("ONE");
@@ -126,6 +104,7 @@ export default class Menu extends Phaser.Scene {
     this.loadSaveFile03 = this.#addKey("THREE");
 
     this.setUpInteractiveButtons();
+    this.setUpLangButtons();
   }
 
   update() {
@@ -173,16 +152,109 @@ export default class Menu extends Phaser.Scene {
     });
   }
 
+  initializeMenuText() {
+    this.title!.text = "";
+    this.title!.text += this.langText!.FinalProject + "\n";
+    this.title!.text += this.langText!.GardeningGame + "\n\n";
+    this.title!.text += this.langText!.StartNewGame + "\n";
+    if (localStorage.getItem("autosave")) {
+      this.title!.text += this.langText!.ContinueFromSave + "\n";
+    }
+    if (localStorage.getItem("savefile01")) {
+      const data = JSON.parse(localStorage.getItem("savefile01")!);
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[1] " + this.langText!.savefile01 + " - [" + time + "]\n";
+      } else {
+        this.title!.text +=
+          "[1] " + "[" + time + "] - " + this.langText!.savefile01 + "\n";
+      }
+    } else {
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[1] " +
+          this.langText!.savefile01 +
+          " - [" +
+          this.langText!.Empty +
+          "]\n";
+      } else {
+        this.title!.text +=
+          "[1] " +
+          "[" +
+          this.langText!.Empty +
+          "] - " +
+          this.langText!.savefile01 +
+          "\n";
+      }
+    }
+    if (localStorage.getItem("savefile02")) {
+      const data = JSON.parse(localStorage.getItem("savefile02")!);
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[2] " + this.langText!.savefile02 + " - [" + time + "]\n";
+      } else {
+        this.title!.text +=
+          "[2] " + "[" + time + "] - " + this.langText!.savefile02 + "\n";
+      }
+    } else {
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[2] " +
+          this.langText!.savefile02 +
+          " - [" +
+          this.langText!.Empty +
+          "]\n";
+      } else {
+        this.title!.text +=
+          "[2] " +
+          "[" +
+          this.langText!.Empty +
+          "] - " +
+          this.langText!.savefile02 +
+          "\n";
+      }
+    }
+    if (localStorage.getItem("savefile03")) {
+      const data = JSON.parse(localStorage.getItem("savefile03")!);
+      const time = this.getTimeForCurrLang(JSON.parse(data.time));
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[3] " + this.langText!.savefile03 + " - [" + time + "]\n";
+      } else {
+        this.title!.text +=
+          "[3] " + "[" + time + "] - " + this.langText!.savefile03;
+      }
+    } else {
+      if (this.currentLang! != "ar") {
+        this.title!.text +=
+          "[3] " +
+          this.langText!.savefile03 +
+          " - [" +
+          this.langText!.Empty +
+          "]\n";
+      } else {
+        this.title!.text +=
+          "[3] " +
+          "[" +
+          this.langText!.Empty +
+          "] - " +
+          this.langText!.savefile03;
+      }
+    }
+  }
+
   setUpInteractiveButtons() {
     const buttonContainer = document.getElementById("ButtonContainer");
     buttonContainer!.innerHTML = "";
     // these still need to be translated
     const startGameButtons = [
-      { text: "Start New Game", savefile: "newgame" },
-      { text: "Continue From Last Save", savefile: "autosave" },
-      { text: "Load Save 1", savefile: "savefile01" },
-      { text: "Load Save 2", savefile: "savefile02" },
-      { text: "Load Save 3", savefile: "savefile03" },
+      { text: this.langText!.StartNewGame, savefile: "newgame" },
+      { text: this.langText!.ContinueFromSave, savefile: "autosave" },
+      { text: this.langText.Save1, savefile: "savefile01" },
+      { text: this.langText.Save2, savefile: "savefile02" },
+      { text: this.langText.Save3, savefile: "savefile03" },
     ];
     for (const b of startGameButtons) {
       const startButton = document.createElement("button");
@@ -192,7 +264,9 @@ export default class Menu extends Phaser.Scene {
       });
       buttonContainer!.append(startButton);
     }
+  }
 
+  setUpLangButtons() {
     const languageButtons = document.getElementById("LanguageButtons");
     // button for english
     const enButton = document.createElement("button");
@@ -201,7 +275,8 @@ export default class Menu extends Phaser.Scene {
       this.currentLang = "en";
       this.langText = this.enLang;
       localStorage.setItem("currentLang", "en");
-      // reload all text on this page here
+      this.initializeMenuText();
+      this.setUpInteractiveButtons();
     });
     languageButtons!.append(enButton);
     // button for chinese
@@ -211,7 +286,8 @@ export default class Menu extends Phaser.Scene {
       this.currentLang = "cn";
       this.langText = this.cnLang;
       localStorage.setItem("currentLang", "cn");
-      // reload all text on this page here
+      this.initializeMenuText();
+      this.setUpInteractiveButtons();
     });
     languageButtons!.append(cnButton);
     // button for arabic
@@ -221,7 +297,8 @@ export default class Menu extends Phaser.Scene {
       this.currentLang = "ar";
       this.langText = this.arLang;
       localStorage.setItem("currentLang", "ar");
-      // reload all text on this page here
+      this.initializeMenuText();
+      this.setUpInteractiveButtons();
     });
     languageButtons!.append(arButton);
   }
