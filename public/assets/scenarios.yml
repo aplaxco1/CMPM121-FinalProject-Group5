@@ -5,7 +5,9 @@
     - Corn
   win_conditions:
     - [Strawberry, 5]
-  human_instructions: "Grow 5 Strawberries"
+  human_instructions_en: "Grow 5 Strawberries"
+  human_instructions_cn: "请种植 5 株草莓"
+  human_instructions_ar: "نمو ٥ فراولة"
 
 - scenario: rainy
   available_crops:
@@ -18,4 +20,6 @@
     - [Corn, 5]
   sun_probability: 0.30
   rain_probability: 0.80
-  human_instructions: "Grow 5 of Each Crop in a Rainy Season"
+  human_instructions_en: "Grow 5 of Each Crop in a Rainy Season"
+  human_instructions_cn: "在雨季时，请将每种庄稼种植 5 株"
+  human_instructions_ar: ""نمو ٥ من كل محصول في موسم ممطر" 
