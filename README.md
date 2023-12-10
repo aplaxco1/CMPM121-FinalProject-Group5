@@ -468,7 +468,16 @@ The three languages that our game currently supports include English, Chinese, a
 
 ### Mobile Installation
 
+In setting up our game to be installable on a mobile device, we utilized the Capacitor runtime in order to help us do so. As we created an Android build of our game, we also utilized the Android Studio IDE. In order to complete this requirement, we followed the guide provided within Capacitor's documentation for environment setup, installing and setting up Capactitor through Node.js, and building our project into an executable mobile application. When using Android Studio, we also utilized a guide on the Android Developers site in order to transfer the build of our game made using Capacitor onto an actual physical Android device. The links to these two sources are provided below:
+
+- https://capacitorjs.com/docs/getting-started
+- https://developer.android.com/studio/run/device
+
+Beyond installing Capacitor utilizing Node.js, and altering some configurations within our vite.config.js file so that vite would know the proper way to build the project utilzing Capacitor, no actual changes to the code itself were necessary. This runtime made it very simple for us to build or game for Android devices, test that build on Android Studio, and then utilize developer tools on one of our Android devices in order to install the build of the game from Android Studio onto our physical mobile device to create an application that could be launched and easily played, regardless of wether the player was connected to the internet or not.
+
 ### Mobile Play (Offline)
+
+In order to make our game actually playable on mobile devices, we had to add in HTML buttons which correlated to each of the possible actions within the game. In order to do so, we created an HTML container, and, in the Menu and Play scenes, created the necessary labled buttons to this container and associated each of their click events with a pre-established function already implemented within the game. Prior, all of the actions within the game were all done by player keyboard inputs handled through Phaser, but since mobile devices have no means of keyboard inputs, whe had to include buttons with mouse click events, as mobile devices do allow for mouse events using touch-screen inputs. We decided to keep both input options however, as playing the game on a PC or laptop would still be much easier using the keyboard, while the buttons were more so for mobile players.  The only function we reallly had to add for this implementation was a new player movement function, so that the player would move by an individual cell, rather then have continuous movement, due to the fact that HTML buttons only really have a click event, and weren't able to easily handle a click and hold event for the case of continuous movement.
 
 ## Reflection
 
